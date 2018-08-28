@@ -1,0 +1,187 @@
+<template>
+    <div class="all">
+        <div class="login_box">
+            <div>
+                <div class="img-box">
+                    <img src="/assets/logo.png" alt="">
+                </div>
+                <div class="text-box">
+                    鲲鹏<span>读写</span>平台
+                </div>
+                <div class="input-box">
+                    <img src="/assets/drawable-xxhdpi/Thelogin_icon_account.png" alt="">
+                    <el-input id="loginName" v-model="user.account" placeholder="用户名" class="my-input"></el-input>
+                </div>
+                <div class="input-box">
+                    <img src="/assets/drawable-xxhdpi/Thelogin_icon_password.png" alt="">
+                    <el-input type="password" id="loginPwd" v-model="user.pwd" placeholder="密码" @keyup.enter.native="login()" class="my-input"></el-input>
+                </div>
+                <el-button class="my-button" type="primary" style="width:100%;" :loading="btnLoad" @keyup.enter="login()" @click="login()">登录</el-button>
+                <div class="forgetPassword">
+                    <el-checkbox class="remPass">记住密码</el-checkbox>
+                    <router-link to='/forget' class="forget">忘记密码?</router-link>
+                </div>
+            </div>
+        </div>
+    </div>
+</template>
+<script>
+    import Login from '@src/network/login.js'
+
+    export default {
+        name:'login',
+        data(){
+            return{
+                msg:'page login',
+                btnLoad:false,
+                modal:{//控制modal
+                    show:false,
+                    title:'提示',
+                    cancelText:'取消',
+                    okText:'确认',
+                    contentText:'提示'
+                },
+                user:{
+                    account:'',
+                    pwd:''
+                },
+                userMess: ''
+            }
+        },
+        mounted(){
+        },
+        components:{
+
+        },
+        methods:{
+            login(){
+                let that = this
+                if(that.user.account == '' || that.user.pwd == ''){
+                    that.$message('请输入账号和密码');
+                    return
+                }
+                let obj = {userName:that.user.account, password:that.user.pwd}
+                Login.login(obj).then(res => {
+//                    console.log(res)  接受到的参数
+
+                    let userMess = {username: that.user.account}
+                    sessionStorage.setItem('user', JSON.stringify(userMess))  // 存储用户信息
+                    let body = res.data
+                    let succesCode = 0
+                    if (succesCode === body.code) {
+                        that.$router.push({   // 你需要接受路由的参数再跳转
+                            path: '/home'
+                        });
+                        that.global.session.set('user', res.data.data)
+                    } else if (body.code == 3010 || body.code == 3011 ) {
+                        that.$message.error('用户名密码错误')
+                        that.btnLoad = false
+                    }
+                })
+            }
+        }
+    }
+</script>
+<style lang="less">
+    .all{
+    width: 100%;
+    height: 100%;
+    position: fixed;
+    .login_box {
+        background: url("/assets/bg.png") no-repeat;
+        width: 100%;
+        height: 100%;
+        margin: 0 auto;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        position: relative;
+    >div {
+         padding: 40px 48px 0;
+         position: relative;
+         top: -2rem;
+         border: 1px solid #e2e2e2;
+         width: 394px;
+         height: 526px;
+         border-radius: 6px;
+         background: #ffffff;
+    .img-box{
+        text-align: center;
+        margin-bottom: 16px;
+        margin-top: -104px;
+    }
+    .text-box{
+        text-align: center;
+        font-family: MicrosoftYaHei Regular;
+        font-size: 24px;
+        color: #626262;
+        margin-bottom: 20px;
+        font-weight: bold;
+        >span{
+        color:#2C8DEE;
+         }
+    }
+    .spread-box{
+        margin-bottom: 32px;
+    >*{
+         display: inline-block;
+         font-size: 0;
+     }
+    .spread{
+        margin-bottom: 5px;
+        width: 116px;
+        border-top: 1px solid #efebeb;
+    }
+    .text{
+        margin: 0 20px;
+        font-size: 18px;
+        color: #b1b1b1;
+    }
+    }
+    .input-box{
+        border-radius: 4px;
+        height: 48px;
+        position: relative;
+        margin-bottom: 24px;
+    img{
+        position: absolute;
+        top: 16px;
+        z-index: 1;
+        display: inline-block;
+        left: 8px;
+    }
+    .my-input{
+    >input{
+         background: #f3f3f3;
+         border: none;
+         height: 48px;
+         line-height: 48px;
+         padding-left: 40px;
+         font-size: 16px;
+         color: #b1b1b1;
+         font-family: MicrosoftYaHei Regular;
+         border-bottom: 1px solid #b1b1b1;
+        background-color: transparent;
+     }
+    }
+    }
+    .my-button{
+        border-radius: 6px;
+        color: #ffffff;
+        font-size: 16px;
+        margin-top: 20px;
+    }
+    .forgetPassword .remPass{
+        display: inline-block;
+    }
+    .forgetPassword .forget{
+       color: #2C8DEE;
+       font-size: 14px;
+       display: inline-block;
+       margin-left: 232px;
+       text-decoration: none;
+    }
+    }
+    }
+    }
+</style>

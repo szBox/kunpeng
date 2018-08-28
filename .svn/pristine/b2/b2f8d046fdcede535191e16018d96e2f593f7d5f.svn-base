@@ -1,0 +1,264 @@
+<template>
+	<div class="paperSee">
+		<h4>查看试卷</h4>
+		<ul class="ul-head">
+			<li>
+				<div>阅读类型 : <span>{{search.readTypeName}} </span></div>
+				<div><span>总题目数 : </span>{{search.amount}}道</div>
+			</li>
+			<li>
+				<div>阅读年级 : <span>{{search.gradeName}}</span></div>
+				<div>答题时间 : <span>{{search.answerTime}}分钟</span></div>
+			</li>
+			<li>
+				<div>阅读书籍名称 : <span>{{search.readBookName}}</span></div>
+				<div>总分数 : <span>{{search.score}}分</span></div>
+			</li>
+			<li>
+				<div>组题方式 : <span>{{search.gqTypeName}}</span></div>
+			</li>
+			
+		</ul>
+		
+		
+		<ul class="paper-box">
+			<li v-for="(item,index) in data">
+				<h5 class="paper-title">{{index+1}}、 {{item.name}}</h5>
+				<ul class="ul-abcd">
+					<li v-for='(option,index) in item.qclist'>
+						{{index+1 | optionFilter}} : {{option.value}} -- id:{{option.id}}
+						
+					</li>
+					
+					
+				</ul>
+				<p class="answer-hh">
+					正确答案 : {{item.correct | answerFn(item.qclist)}}
+				</p>
+			</li>
+			
+		</ul>
+			
+		
+	</div>
+
+</template>
+
+<script>
+	import DataTable from '@components/data-table/index';
+	import SearchForm from '@components/search-form/index';
+	import home from '@src/network/home/home.js';
+	import paper from '@src/network/subject/quest-setting/paper.js'
+	export default {
+		data() {
+			return {
+				search: {
+				
+					gqTypeId: '',
+					gradeId: '',
+					name: "",
+					readBookId: '',
+					readTypeId: '',
+					sid: this.global.session.get('user').sid,
+					status: "",
+					current: 1,
+					size: 10,
+					stuId:'',
+					id:''
+					
+				},
+				
+
+				
+				items: [
+                    {
+                        prop: 'gradeId',
+                        type: 'select',
+                        label: '年级',
+                        value:'',
+//                      rules: [
+//                          {required: true, message: '位置不能为空'}
+//                      ],
+                        options: [
+                        ],
+                        defaultProps: {
+                        	id: 'id',
+                        	label: 'name'
+                        },
+                        hasAll: true,
+                        change: (val) => {
+                            this.bookSelect(val);
+                        }
+                    },
+                    {
+                        prop: 'readTypeId',
+                        type: 'select',
+                        label: '阅读类型',
+                        options: [  
+                        ],
+                        defaultProps: {
+                        	id: 'id',
+                        	label: 'name'
+                        },
+                        hasAll: true
+                    },
+                    
+                    {
+                        prop: 'readBookId',
+                        type: 'select',
+                        label: '书籍名称',
+                        options: [  
+                        ],
+                        defaultProps: {
+                        	id: 'id',
+                        	label: 'name'
+                        },
+                        hasAll: true
+                    },
+                   
+                    {
+                        type: 'action',
+                        actionList: [
+                            {
+                                text: '查询',
+                                btnType: 'warning',
+                                handleClick: () => {
+									this.paperList()
+//                                  this.formValidate('locationAddForm', this.save);
+                                }
+                            },
+                            
+                        ]
+                    }
+                ],
+				data: [],
+				total: 0,
+			}
+		},
+		filters:{
+			optionFilter(val){
+				if(val==1){
+					return 'A'
+				}
+				if(val==2){
+					return 'B'
+				}
+				if(val==3){
+					return 'C'
+				}
+				if(val==4){
+					return 'D'
+				}
+				if(val==5){
+					return 'E'
+				}
+			},
+			answerFn(val,options){
+//				console.log(options)
+				var optionArr=['A','B','C','D','E'];
+				var answerAll=[];
+	
+				console.log(val)
+				for(var i=0; i<options.length; i++){
+					if(options[i].id=val){
+						
+					}
+				}
+				
+//				console.log(answerArr)
+			}
+		},
+		methods: {
+			pageChange (index) {
+				this.search.current = index;
+		
+			},
+			getPaper (){
+				let id=this.search.id
+				paper.paper(id).then(res => {
+                    console.log('试卷详情',res)  //接受到的参数
+					if(res.data.code === 0) {
+						this.data=res.data.data.questionsList
+                    }
+                    
+                })
+			},
+			
+         
+           changeSwitch (row){
+           	   	paper.Edit(row).then(res => {
+                    console.log('单条更新',res)  //接受到的参数
+					if(res.data.code === 0) {
+			
+                    }
+                    
+                })
+//		       this.paperList();
+		    
+           },
+   
+		},
+		mounted() {
+			this.search=this.$route.params.init;
+			console.log(this.$route.params.init);
+			this.getPaper();
+		},
+		components: {
+			DataTable,
+			SearchForm
+		}
+	}
+</script>
+
+
+<style lang="less" scoped>
+	*{
+		padding: 0;
+		margin: 0;
+	}
+	.paperSee{
+		background: #fff;
+		padding: 20px;
+	}
+	ul.ul-head{
+		overflow: hidden;
+		li{
+			font-size: 14px;
+			float: left;
+			margin-right: 50px;
+			>div{
+				margin-bottom: 20px;
+				>span{
+					color: #666;
+				}
+			}
+		}
+	}
+	ul.paper-box{
+		>li{
+			margin: 30px 0;
+		}
+		.paper-title{
+			margin: 8px 0;
+			}
+		ul.ul-abcd{
+			margin-left: 45px;
+			overflow: hidden;
+			li{
+				/*float: left;*/
+				margin: 8px 0;
+				/*margin-right: 30px;*/
+			}
+			
+			/*li:nth-child(3n){
+				clear: left;
+			}*/
+		}
+		p.answer-hh{
+			margin-top: 10px;
+			margin-left: 45px;
+		}
+	}
+	
+</style>
+

@@ -1,0 +1,212 @@
+<template>
+	<div>
+		<SearchForm :items="items" :showMessage="true" :inline="true" labelWidth="" :model="search" ref="locationAddForm"></SearchForm>
+		<DataTable :loading="loading" :columns="columns" :data="data" :total="total" :page-size="search.size" @page-change="pageChange"></DataTable>
+	</div>
+
+</template>
+
+<script>
+	import DataTable from '@components/data-table/index';
+	import SearchForm from '@components/search-form/index';
+	
+	import home from '@src/network/home/home.js';
+	import statistics from '@src/network/statistics/statistics.js'
+	
+	export default {
+		data() {
+			return {
+				search: {
+					bookName: "",
+					classId: '',
+					gradeId: '',
+					stuName: "",
+					current: 1,
+					size:10
+				},
+			
+				items: [
+                    {
+                        prop: 'gradeId',
+                        type: 'select',
+                        label: '年级',
+                        value:'',
+//                      rules: [
+//                          {required: true, message: '位置不能为空'}
+//                      ],
+                        options: [
+                        ],
+                        defaultProps: {
+                        	id: 'id',
+                        	label: 'name'
+                        },
+                        hasAll: true,
+                        change: (val) => {
+                            this.classList(val);
+                        }
+                    },
+                    {
+                        prop: 'classId',
+                        type: 'select',
+                        label: '班级',
+                        options: [  
+                        ],
+                        defaultProps: {
+                        	id: 'id',
+                        	label: 'name'
+                        },
+                        hasAll: true
+                    },
+                    
+                    {
+                        prop: 'stuName',
+                        type: 'input',
+                        label: '姓名',
+                    },
+                    {
+                        prop: 'bookName',
+                        type: 'input',
+                        label: '书籍名称',
+                    },
+                    {
+                        type: 'action',
+                        actionList: [
+                            {
+                                text: '查询',
+                                btnType: 'warning',
+                                handleClick: () => {
+									this.tableList()
+//                                  this.formValidate('locationAddForm', this.save);
+                                }
+                            },
+                            
+                        ]
+                    }
+                ],
+				columns: [{
+						label: '姓名',
+						prop: 'stuName'
+					},
+					{
+						label: '班级',
+						prop: 'className'
+					},
+//					{
+//						label: '年级',
+//						prop: 'gradeName'
+//					},
+					{
+						label: '当前阅读书籍',
+						prop: 'bookName'
+					},
+					{
+						label: '答题成绩',
+						prop: 'score'
+					},
+					{
+						label: '答题时间',
+						prop: 'insertTime',
+						renderContent: (h, { row }) => {
+					         return this.global.dateFilter.ymdHm(row.insertTime)					        
+                        }
+					},
+					
+					{
+						label: '题目一级类型正确率',
+						prop: 'qtypes',
+						width: '320',
+						renderContent: (h, { row }) => {
+							return row.qtypes.map(q => {
+								 return (<el-tag  style='margin-right:6px' class="rate-span">{q.qtypeName} {q.rate}%</el-tag>)
+							})
+//                          return [
+//                              <el-button type='primary' size='mini' on-click={() => this.$router.push('function/add/' + row.id)}>添加子菜单</el-button>,
+//                              <el-button type='primary' size='mini' on-click={() => this.$router.push({ name: '更新功能模块', params: { obj: row }})}>更新</el-button>,
+//                              <el-button type='danger' size='mini' on-click={() => this.global.deleteConfirm.call(this, this.deleteOne, row.id)}>删除</el-button>
+//                          ];
+                        }
+					},
+					{
+						label: '当前书籍答题次数',
+						prop: 'number'
+					},
+				],
+				data: [],
+				total: 0,
+				loading: true
+			}
+		},
+		methods: {
+			pageChange(index) {
+				this.search.current = index;
+				this.tableList();
+			},
+			
+			classList(){
+				let params = {
+					sid:this.global.session.get('user').sid,
+					gid:this.search.gradeId
+				};
+				home.classList(params).then(res => {
+                    console.log('班级下拉 列表',res)  //接受到的参数
+					if(res.data.code === 0) {
+						this.items[1].options = res.data.data;
+                    }
+                    
+                })
+			},
+			tableList() {
+				let params ={
+					...this.search
+				}
+				statistics.table(params).then(res => {
+                    console.log('答题记录',res)  //接受到的参数
+					if(res.data.code === 0) {
+						this.loading = false;
+						this.data = res.data.data.records;
+                        this.total =  res.data.data.total;
+                    }
+                    
+                })
+            }
+		},
+		mounted() {
+			this.items[0].options=this.global.session.get('gradeList') 
+			this.tableList()
+			this.classList()
+		},
+		components: {
+			DataTable,
+			SearchForm
+		}
+	}
+</script>
+<style>
+	.cell .rate-span{
+		padding: 0 !important;
+		width: 92px !important;
+		text-align: center;
+	}
+	.cell .rate-span:nth-child(4n-3){
+		color:  #409EFF !important;
+ 		background: #ECF5FF !important;
+ 	}
+ 	.cell .rate-span:nth-child(4n-2){
+ 		color:  #67c23a !important;
+ 		background: #F0F9EB !important;
+ 	}
+ 	.cell .rate-span:nth-child(4n-1){
+ 		color:  #e6a23c !important;
+ 		background: #FCF6EB !important;
+ 	}
+ 	.cell .rate-span:nth-child(4n){
+ 		color:  #f56c6c !important;
+ 		background: #FEF0F0 !important;
+ 	}
+</style>
+
+<style lang="less" scoped>
+
+	
+</style>
+

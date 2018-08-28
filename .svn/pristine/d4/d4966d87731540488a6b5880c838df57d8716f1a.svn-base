@@ -1,0 +1,91 @@
+<template>
+    <div class="view">
+        <div class="title">
+            更新题型分类
+        </div>
+        <SearchForm :items="items" :showMessage="true" :inline="false" labelWidth="100px" :model="search" ref="functionAddForm"></SearchForm>
+    </div>
+</template>
+<script>
+
+    import SearchForm from '@components/search-form/index';
+    import questApi from '@src/network/subject/quest-setting/questStar';
+    export default{
+        data () {
+            return{
+                search: {
+                    rank: this.$route.query.rank,
+                    remark: this.$route.query.remark,
+                    id: this.$route.query.id
+                },
+                items:[
+                    {
+                        prop: 'rank',
+                        type: 'input',
+                        label: '题目星级：'
+                    },
+                    {
+                        prop: 'remark',
+                        type: 'input',
+                        label: '说明：'
+                    },
+                    {
+                        type: 'action',
+                        actionList: [
+                            {
+                                text: '提交',
+                                btnType: 'danger',
+                                handleClick: (row) => {
+                                    this.global.formValidate.call(this,'functionAddForm', this.save);
+                                }
+                            },
+                            {
+                                text: '返回',
+                                btnType: 'primary',
+                                handleClick: (row) => {
+                                    this.$router.go(-1);
+                                }
+                            }
+                        ]
+                    }
+                ]
+            }
+        },
+        methods: {
+            save() {
+                let params = {
+                    ...this.search
+                };
+                console.log(params,'3333')
+                questApi.edit(params).then((res) => {
+                    if(res.data.code == 0){
+                        this.$message.success('修改成功');
+                        this.$router.go(-1);
+                    }
+                })
+            }
+
+        },
+        components: {
+            SearchForm
+        },
+        created(){
+            console.log(this.$route.query.obj.name, '3333')
+        }
+    }
+</script>
+<style lang="less">
+    .view{
+        background-color: #ffffff;
+        padding: 40px;
+    .title{
+        font-size: 18px;
+        color: #454c5c;
+        padding-left: 5px;
+        font-weight: bold;
+        border-left: 4px solid #2C8DEE;
+        margin-bottom: 20px;
+    }
+    }
+
+</style>

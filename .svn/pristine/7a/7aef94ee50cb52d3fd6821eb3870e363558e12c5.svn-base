@@ -1,0 +1,50 @@
+
+var vue = new Vue();
+const global = {
+    session: {
+        set(key, val) {
+            sessionStorage.setItem(key, JSON.stringify(val));
+        },
+        get(key) {
+            return JSON.parse(sessionStorage.getItem(key)) || {};
+        },
+        clear() {
+            sessionStorage.clear();
+        }
+    },
+    menu: {
+        get(menu) {
+            return global.session.get('user').menus || [];
+        }
+    },
+    //验证提示
+    formValidate (target, fun) {
+        this.$refs[target].$refs['form'].validate((valid) => {
+            if (valid) {
+                fun();
+            } else {
+                return false;
+            }
+        });
+    },
+     //删除提示
+     deleteConfirm  (fun, parmas) {
+        this.$confirm('确定删除吗？' , '提示', {
+          confirmButtonText: '确定',
+          cancelButtonText: '取消',
+          type: 'warning'
+        }).then(() => {
+          fun(parmas);
+        }).catch(() => {
+          this.$message({
+            type: 'info',
+            message: '已取消删除'
+          });
+        });
+      }
+}
+
+
+
+
+export default global;

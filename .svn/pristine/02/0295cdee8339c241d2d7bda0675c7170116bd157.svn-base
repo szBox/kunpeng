@@ -1,0 +1,136 @@
+<template>
+    <div class="questType">
+        <div class="content">
+            <div class="button-box">
+                <el-button v-has="10010301" type="primary" icon="el-icon-plus" @click="$router.push('QuestType/add')">添加</el-button>
+                <el-button type="danger" plain icon="el-icon-close" class="delectBatch" @click="delectAll">批量删除</el-button>
+            </div>
+            <DataTable :loading="loading" :columns="columns" :data="data" :total="total" :page-size="search.size" @page-change="pageChange" @selection-change="selectionChange"></DataTable>
+        </div>
+    </div>
+</template>
+<script>
+
+    // 模块的引用
+    import SearchForm from '@components/search-form/index';
+    import DataTable from '@components/data-table/index'
+
+    //  接口
+    import questApi from '@src/network/subject/quest-setting/quest-type';
+
+    export default {
+        name: 'questType',
+        data: function () {
+            return {
+                search: {
+                    current: 1,
+                    size: 10
+                },
+                // table的属性设置
+                columns: [
+                    {
+                        label: '年级',
+                        prop: 'id'
+                    },
+                    {
+                        label: '题目总数量',
+                        prop: 'name'
+                    },
+                    {
+                        label: '试卷总分',
+                        prop: 'remark',
+                    },
+                    {
+                        label: '答题时间',
+                        prop: 'remark',
+                    },
+                    {
+                        type: 'action',
+                        width: '250',
+                        label: '操作',
+                        renderContent: (h, { row }) => {
+                            return [
+                                <el-button type='primary' size='mini' on-click={() => this.$router.push({ name: 'questView', params: { obj: row }})}>查看</el-button>,
+                            <el-button type='primary' size='mini' on-click={() => this.$router.push({ name: 'quset-edit', query: row })}>更新</el-button>,
+                            <el-button type='danger' size='mini' on-click={() => this.global.deleteConfirm.call(this, this.delect, row.id)}>删除</el-button>
+                            ];
+                        }
+                    }
+                ],
+                data: [],
+                loading: true, //  加载缓冲
+                total: 0,  // 总页数,
+                selection: []
+
+
+            }
+        },
+        components: {
+            SearchForm,
+            DataTable
+        },
+        methods: {
+            selectionChange(selection){
+                this.selection = selection
+            },
+            pageChange(index) {
+                this.search.current = index;
+                this.questList();
+            },
+            questList() {
+                let params = {
+                    ...this.search
+                };
+                this.loading = true;
+                questApi.list(params).then(res => {
+                    if(res.data.code === 0) {
+                        this.loading = false;
+                        this.data = res.data.data.records;
+                        this.total = this.data.length;
+                    }
+                })
+            },
+            delect(id){
+                questApi.del(id).then(res => {
+                    if(res.data.code === 0) {
+                        this.$message.success('删除成功');
+                        this.questList();
+                    }
+                })
+            },
+            delectAll(){
+                let params = []
+                this.selection.map(value => {
+                    params.push(value.id)
+                })
+                console.log(params, this.selection)
+                questApi.deleAll(params).then(res => {
+                    if(res.data.code === 0) {
+                        this.$message.success('删除成功');
+                        this.questList();
+                    } else{
+                        this.$message.success('删除失败');
+                    }
+                })
+            }
+        },
+        mounted() {
+            this.questList();
+        },
+    }
+</script>
+<style lang="less">
+    .questType{
+    .bread-title{
+        padding: 10px 0 10px 20px;
+    .last >span{color: #474e5d;}
+    }
+    .content{
+        background-color: #ffffff;padding: 20px 18px;
+    .button-box{
+    .delectBatch{float: right}
+    }
+    }
+    }
+</style>
+

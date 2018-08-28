@@ -1,0 +1,154 @@
+<template>
+    <div class="forget-password">
+        <div class="forget_box">
+            <div>
+                <div class="title">重置密码</div>
+                <div class="input-box">
+                    <img src="/assets/drawable-xxhdpi/reset_icon_Mobilephone.png" alt="">
+                    <el-input id="loginName" v-model="user.account" placeholder="请输入手机号码" class="my-input"></el-input>
+                    <span class="erroMess" v-if="checkPhone">手机格式错误</span>
+                </div>
+                <div class="input-box">
+                    <img src="/assets/drawable-xxhdpi/reset_icon_Verificationcode.png" alt="">
+                    <el-button size="mini" class="getCode" @click="getCode" :disabled="disabled">获取验证码</el-button>
+                    <el-input type="password" id="loginPwd" v-model="user.pwd" placeholder="请输入验证码" class="my-input"></el-input>
+                    <span class="erroMess" v-if="checkCode">验证码错误</span>
+                </div>
+                <div class="input-box">
+                    <img src="/assets/drawable-xxhdpi/Thelogin_icon_password.png" alt="">
+                    <el-input type="password" id="loginPwd" v-model="user.newPwd" placeholder="请输入新密码" class="my-input"></el-input>
+                    <span class="erroMess" v-if="checkPwd">密码必须大于6位</span>
+                </div>
+                <div class="input-box">
+                    <img src="/assets/drawable-xxhdpi/Thelogin_icon_password.png" alt="">
+                    <el-input type="password" id="loginPwd" v-model="user.newPwd" placeholder="请再次确认新密码" class="my-input"></el-input>
+                    <span class="erroMess" v-if="checkNewpwd">两次密码输入不一致</span>
+                </div>
+                <el-button class="my-button" type="primary" style="width:100%;" :loading="btnLoad" @keyup.enter="login()" @click="determine()">确定</el-button>
+                <router-link to='/login' class="back">返回</router-link>
+            </div>
+        </div>
+    </div>
+</template>
+<script>
+    export default {
+        data() {
+            return {
+                checkPhone: false,
+                checkCode: false,
+                checkPwd: false,
+                checkNewpwd: false,
+                disabled: false,
+                timer: '',
+                user:{
+                    account: '',
+                    getCode: '',
+                    pwd: '',
+                    newPwd: ''
+                }
+            }
+        },
+        components: {
+        },
+        methods: {
+            // 验证手机号码
+            isPhone: function (tel) {
+                const str = [134, 135, 136, 137, 138, 139, 147, 150, 151, 152, 157, 158, 159, 182, 183, 187, 188, 198, 130, 131, 132, 155, 156, 185, 186, 145, 166, 133, 153, 180, 189, 181, 199, 170].join('|')
+                const reg = new RegExp(`^(${str})\\d{8}`, 'gi')
+                return reg.test(tel)
+            },
+            // 验证验证码
+            isCode: function (code) {
+                const reg = /\d{4}$/
+                return reg.test(code)
+            },
+            //获取验证码
+        }
+    }
+</script>
+<style lang="less">
+    .forget-password{
+        width: 100%;
+        height: 100%;
+        position: fixed;
+        .forget_box{
+            background: url("/assets/bg.png") no-repeat;
+            width: 100%;
+            height: 100%;
+            margin: 0 auto;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            position: relative;
+        >div{
+             padding: 51px 63px 0;
+             position: relative;
+             top: -2rem;
+             border: 1px solid #e2e2e2;
+             width: 481px;
+             height: 540px;
+             border-radius: 6px;
+             background: #ffffff;
+             .title{
+                 font-size: 24px;
+                 font-weight: bold;
+                 color: #454c5c;
+                 text-align: center;
+                 margin-bottom: 30px;
+             }
+             .my-button{
+                 border-radius: 6px;
+                 color: #fff;
+             }
+             .back{
+                 font-size: 16px;
+                 text-decoration: none;
+                 color: #2d8cf0;
+                 margin-top: 16px;
+                 display: block;
+             }
+             .input-box{
+                 border-radius: 4px;
+                 height: 48px;
+                 position: relative;
+                 margin-bottom: 24px;
+                 img{
+                     position: absolute;
+                     top: 16px;
+                     z-index: 1;
+                     display: inline-block;
+                     left: 8px;
+                 }
+                 .my-input{
+                     margin-bottom: 4px;
+                      >input{
+                          background: #f3f3f3;
+                          border: none;
+                          height: 48px;
+                          line-height: 48px;
+                          padding-left: 60px;
+                          font-size: 16px;
+                          color: #b1b1b1;
+                          font-family: MicrosoftYaHei Regular;
+                          border-bottom: 1px solid #b1b1b1;
+                          background-color: transparent;
+                      }
+                 }
+                 .getCode {
+                     position: absolute;
+                     right: 10px;
+                     top: 5px;
+                     z-index: 99;
+                     border-radius: 4px;
+                     border: solid 1px #2d8cf0;
+                     color:#2d8cf0;
+                 }
+                 .erroMess{
+                     color:#f76060;
+                     font-size: 14px;
+                 }
+             }
+        }
+        }
+    }
+</style>

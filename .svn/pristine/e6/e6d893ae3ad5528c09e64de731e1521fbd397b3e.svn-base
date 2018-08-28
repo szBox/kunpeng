@@ -1,0 +1,76 @@
+<template>
+    <div class="function-add">
+        <SearchForm :items="items" :showMessage="true" :inline="false" labelWidth="120px" :model="search" ref="functionAddForm"></SearchForm>
+   		<el-button @click="() => this.global.formValidate.call(this,'functionAddForm', getEdit)" type='primary' >更新</el-button>
+    	<el-button @click='goBack()' type='danger'>返回</el-button>
+    </div>
+</template>
+<script>
+    import SearchForm from '@components/search-form/index';
+	import booksSet from '@src/network/books/booksSet.js';
+    export default {
+        data() {
+            return {
+                search: {
+                  	name:'',
+                  	remark:''
+                },
+
+                items: [
+                    {
+                        prop: 'name',
+                        type: 'input',
+                        label: '阅读类型名称',
+                        placeholder: '请输入阅读类型',
+                        rules: [
+                            {required: true, message: '书籍类别不能为空'}
+                        ],
+                    },
+                    {
+                        prop: 'remark', 		             	
+                        label: '说明',
+                        placeholder: '请输入阅读说明',
+                        rules: [
+                            {required: true, message: '书籍类别不能为空'}
+                        ],
+                        type: 'textarea',
+//						renderContent: () => {
+//							return <el-input type="textarea" v-model="remark"></el-input>
+//						}
+                    },
+                    
+
+                ]
+            }
+        },
+        methods: {
+            getEdit(){
+            	booksSet.Edit(this.search).then(res => {
+					if(res.data.code === 0) {
+						this.$message.success('更新成功');
+						this.$router.go(-1);
+                    }
+                    
+                })
+            },
+            goBack(){
+            	this.$router.go(-1);
+            }
+          
+        },
+        
+         created() {
+    	 	this.search=this.$route.params.init
+        },
+        components: {
+            SearchForm
+        }
+    }
+</script>
+<style lang="less" scoped>
+    .function-add{
+        padding: 40px;
+        background-color: #ffffff;
+    }
+</style>
+

@@ -1,0 +1,103 @@
+<template>
+    <div class="view">
+        <div class="title">
+           	 推荐书籍详情
+        </div>
+        <SearchForm :items="items"  :inline="false" :model="search" ref="onSubmit"></SearchForm>
+        
+        <el-button @click='goBack()' type='primary'>返回</el-button>
+    </div>
+</template>
+<script>
+
+    import SearchForm from '@components/search-form/index';
+
+    export default{
+        data () {
+           return {
+                search: {
+                    gradeName: '',
+                    name: '',
+                    author:'',
+                    coverUrl:'',
+                    press:'',
+                    typeName:''
+                },
+  
+                
+                types:{
+                	current: 1,
+					name: "",
+					sid:  this.global.session.get('user').sid,
+					size: 9999
+                }
+                ,
+                items: [
+                    {
+                        prop: 'name',
+                        type: 'text',
+                        label: '推荐书籍名称：',
+                    },
+                    {
+                        prop: 'author',
+                        type: 'text',
+                        label: '作者：',
+                    },
+                    {
+                        prop: 'press',
+                        type: 'text',
+                        label: '出版社：',
+                      
+                    },
+                     {
+                        prop: 'gradeName',
+                        type: 'text',
+                        label: '年级：',
+                       
+                    },
+                     {
+                        prop: 'typeName',
+                        type: 'text',
+                        label: '类别：',
+                        
+                    },
+                  
+                    {
+                        prop: 'coverUrl',
+                        type: 'img',
+                        label: '书籍封面：'
+                    },
+                   
+                ]
+            }
+        },
+        methods: {
+			 goBack(){
+            	this.$router.go(-1);
+            }
+
+        },
+        components: {
+            SearchForm
+        },
+        mounted(){
+       		 this.search=this.$route.params.init
+        	console.log(this.search)
+        }
+    }
+</script>
+<style lang="less">
+    .view{
+        background-color: #ffffff;
+        padding: 40px;
+    .title{
+        font-size: 18px;
+        color: #454c5c;
+        padding-left: 5px;
+        font-weight: bold;
+        border-left: 4px solid #2C8DEE;
+        margin-bottom: 20px;
+    }
+    }
+
+</style>

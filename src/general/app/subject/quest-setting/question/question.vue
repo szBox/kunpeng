@@ -1,0 +1,235 @@
+<template>
+    <div class="questType">
+            <SearchForm :items="items" :showMessage="true" :inline="true" :model="search" ref="onSubmit"></SearchForm>
+            <div class="button-box">
+                <el-button class='btn-add' v-has="10010301" type="primary" icon="el-icon-plus" @click="$router.push('question/add')">添加</el-button>
+                <el-button class='btn-delete' type="danger" plain icon="el-icon-close" @click="delectAll()">批量删除</el-button>
+            </div>
+            <DataTable :loading="loading" :columns="columns" :data="data" :total="total" :page-size="search.size" @page-change="pageChange" @selection-change="selectionChange"></DataTable>
+    </div>
+</template>
+<script>
+
+    // 模块的引用
+    import SearchForm from '@components/search-form/index';
+    import DataTable from '@components/data-table/index'
+	import quseType from '@src/network/subject/quest-setting/answer-public.js'
+    //  接口
+    import questApi from '@src/network/subject/quest-setting/questions';
+
+    export default {
+        name: 'questType',
+        data: function () {
+            return {
+                search: {
+                    current: 1,  // 当前页数
+                    size: 10,   // 条数
+                    name: '',
+                    bookName:'',
+                    answerTypeId: '',
+                    questionsTypeId: '',
+                },
+                items: [
+                	{
+                        prop: 'bookName',
+                        type: 'input',
+                        label: '书籍名称',
+                       
+                    },
+                	{
+                        prop: 'name',
+                        type: 'input',
+                        label: '题目名称',
+                       
+                    },
+					{
+                        prop: 'questionsTypeId',
+                        type: 'select',
+                        label: '题目类型',
+                        placeholder: '请选择',
+                        options: [
+
+                        ],
+                        hasAll: true,
+                        defaultProps: {
+                            id: 'id',
+                            label: 'name'
+                        }
+                    },
+                    {
+                        type: 'action',
+                        actionList: [
+                            {
+                                text: '查询',
+                                btnType: 'warning',
+                                handleClick: (row) => {
+                                	this.search.current=1;
+                                    this.questList();
+                                }
+                            }
+                        ]
+                    }
+                ],
+                // table的属性设置
+                columns: [
+                    {
+                        //  全选模块
+                        type: 'selection'
+                    },
+                    {
+                        label: '题型分类ID',
+                        prop: 'id'
+                    },
+                    {
+                        label: '阅读书籍名称',
+                        prop: 'bookName'
+                    },
+                    {
+                        label: '题目类型',
+                        prop: 'qyname',
+                    },
+                   
+                    {
+                        label: '题目星级难度',
+                        prop: 'questionsRandId',
+                        width:'150',
+                        renderContent: (h, {row}) => {
+                            return (
+                                <el-rate value={row.questionsRandId} max={row.questionsRandId} disabled text-color="#ff9900"></el-rate>
+                            )
+                        }
+                    },
+                    {
+                        label: '题目信息',
+                        prop: 'name',
+                    },
+                    {
+                        type: 'action',
+                        width: '250',
+                        label: '操作',
+                        renderContent: (h, { row }) => {
+                            let toQusetEdit = () => {
+                                this.$router.push(
+                                    {
+                                        name: 'quset-edit',
+                                        query: row
+                                    }
+                                )
+                            }
+                            return [
+                                <el-button type='primary' size='mini' on-click={() => this.$router.push(`question/view/${row.id}`)}>查看</el-button>,
+                                <el-button type='' size='mini' on-click={() => this.$router.push(`question/edit/${row.id}`)} class='el-Edit'>更新</el-button>,
+                                <el-button type='danger' size='mini' on-click={() => this.global.deleteConfirm.call(this, this.delect, row.id)}>删除</el-button>
+                            ];
+                        }
+                    }
+                ],
+                data: [],
+                deleteArr: [],	
+                loading: true, //  加载缓冲
+                total: 0  // 总页数
+
+
+            }
+        },
+        components: {
+            SearchForm,
+            DataTable
+        },
+        methods: {
+            pageChange(index) {
+                this.search.current = index;
+                this.questList();
+            },
+            questList() {
+                let params = {
+                    ...this.search
+                };
+                this.loading = true;
+                questApi.list(params).then(res => {
+                    if(res.data.code === 0) {
+                        this.loading = false;
+                        this.data = res.data.data.records;
+                        this.total = res.data.data.total;
+                    }
+                })
+            },
+             // 题目类型
+            questType () {
+                quseType.questType().then(res => {
+                    if(res.data.code === 0) {
+                        this.items[2].options = res.data.data
+                    }
+                })
+            },
+            selectionChange(data) {
+				this.deleteArr=[];
+				for (let item of data){
+					this.deleteArr.push(
+						item.id
+					)
+				}
+			},
+			delect(id){
+            	if(this.data.length === 1 && this.search.current > 1) {
+           				this.search.current--;
+           		}
+                questApi.del(id).then(res => {
+                    if(res.data.code === 0) {
+                        this.$message.success('删除成功');
+                        this.questList();
+                    }else if(res.data.code === 1017){
+                    	this.$message.error('该试题已经关联试卷');
+                    }
+                })
+            },
+            delectAll() {
+				let self=this;
+		        if(this.deleteArr.length === 0) {
+		          this.$message.error('请至少选择一项');
+		          
+		          return;
+		        }else{
+//		        	console.log(this.deleteArr)
+		        	if(this.data.length === 1 && this.search.current > 1) {
+           				this.search.current--;
+           			}
+		        	let ids=this.deleteArr;
+		        	console.log('ids,',ids)
+		        	this.global.deleteConfirm.call(this,function(){
+		        		questApi.dels(ids).then(res => {
+					          if(res.data.code === 0) {
+					            self.$message.success('删除成功');
+					            self.questList();
+					          }else if(res.data.code === 1017){
+			                    	this.$message.error('所选试题已经关联试卷');
+			                    }
+					     })
+		        	})	
+		        	
+		        }
+		        
+		   	},
+			
+        },
+        mounted() {
+        	 this.questType();
+            this.questList();
+        },
+    }
+</script>
+<style lang="less">
+    .questType{
+    .bread-title{
+        padding: 10px 0 10px 20px;
+    .last >span{color: #474e5d;}
+    }
+    .content{
+        background-color: #ffffff;padding: 20px 18px;
+    .button-box{
+    .delectBatch{float: right}
+    }
+    }
+    }
+</style>
+

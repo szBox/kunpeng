@@ -1,0 +1,39 @@
+//答题记录
+const Jilu = () => import(/* webpackChunkName: "setting" */ '@src/general/app/statistics/analysis/jilu.vue');
+
+//答题统计
+const Tongji = () => import(/* webpackChunkName: "setting" */ '@src/general/app/statistics/analysis/tongji.vue');
+//查看统计详情
+const TongjiInfo = () => import(/* webpackChunkName: "setting" */ '@src/general/app/statistics/analysis/TongjiInfo.vue');
+
+//统计排行榜
+const TongjiPhP = () => import(/* webpackChunkName: "setting" */ '@src/general/app/statistics/analysis/tongjiPhp.vue');
+const ReadPhP = () => import(/* webpackChunkName: "setting" */ '@src/general/app/statistics/analysis/readPhp.vue');
+export default [
+    {
+        path: 'jilu',
+        component: Jilu,
+        name:'答题记录',
+    },
+    {
+        path: 'tongji',
+        component: Tongji,
+        name:'答题统计',
+    },
+    {
+        path: 'Tongji/info',
+        component: TongjiInfo,
+        name:'统计详情',
+    },
+    {
+        path: 'tongjiPhp',
+        component: TongjiPhP,
+        name:'阅读统计排行',
+    },
+    {
+        path: 'readPhp',
+        component: ReadPhP,
+        name:'阅读数量排行',
+    },
+    
+]

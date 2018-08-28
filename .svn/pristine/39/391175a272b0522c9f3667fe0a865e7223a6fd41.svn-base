@@ -1,0 +1,41 @@
+
+const booksAdmin = () => import(/* webpackChunkName: "setting" */ '@src/general/app/books/Admin/list1/booksAdmin.vue');
+const booksType = () => import(/* webpackChunkName: "setting" */ '@src/general/app/books/Admin/list2/booksType.vue');
+//添加阅读书籍
+const booksAdd = () => import(/* webpackChunkName: "setting" */ '@src/general/app/books/Admin/list1/Add.vue');
+//阅读书籍 详情
+const booksSee = () => import(/* webpackChunkName: "setting" */ '@src/general/app/books/Admin/list1/See.vue');
+//阅读书籍 更新
+const booksEdit = () => import(/* webpackChunkName: "setting" */ '@src/general/app/books/Admin/list1/Edit.vue');
+export default [
+    {
+        path: 'booksAdmin',
+        component: booksAdmin,
+        name:'tuijianAdmin',
+        meta:{name:'推荐管理'},
+    },
+    {
+        path: 'booksType',
+        component: booksType,
+        name:'tuijianType',
+        meta:{name:'推荐类别'},
+    },
+    {
+        path: 'booksAdmin/add',
+        component: booksAdd,
+        name:'booksAdd',
+        meta:{name:'添加阅读书籍'},
+    },
+    {
+        path: 'booksAdmin/edit',
+        component: booksEdit,
+        name:'booksEdit',
+        meta:{name:'阅读书籍编辑'},
+    },
+    {
+    	path: 'booksAdmin/see',
+        component: booksSee,
+        name:'booksSee',
+        meta:{name:'推荐书籍详情'},
+    }
+]

@@ -1,0 +1,65 @@
+<template>
+    <div class="function-add">
+    	<h4>查看阅读类型</h4>
+        <SearchForm :items="items" :showMessage="true" :inline="false" labelWidth="120px" :model="search" ref="functionAddForm"></SearchForm>
+    	<el-button @click='goBack()' type=''  style='margin-left: 115px; border:none; background: #F46C6C; color:#fff'>返回</el-button>
+    </div>
+</template>
+<script>
+    import SearchForm from '@components/search-form/index';
+	import booksSet from '@src/network/books/booksSet.js';
+    export default {
+        data() {
+            return {
+                search: {
+                  	name:'',
+                  	remark:''
+                },
+
+                items: [
+                    {
+                        prop: 'name',
+                        type: 'text',
+                        label: '阅读类型名称',
+                       
+                    },
+                    {
+                        prop: 'remark', 		             	
+                        label: '说明',
+                        placeholder: '请输入阅读说明',
+                        type: 'text',
+//						renderContent: () => {
+//							return <el-input type="textarea" v-model="remark"></el-input>
+//						}
+                    },
+                    
+
+                ]
+            }
+        },
+        methods: {
+            
+            goBack(){
+            	this.$router.go(-1);
+            }
+          
+        },
+        
+         created() {
+    	 	this.search=this.$route.params.init
+        },
+        components: {
+            SearchForm
+        }
+    }
+</script>
+<style lang="less" scoped>
+    .function-add{
+        padding: 40px;
+        background-color: #ffffff;
+    }
+    .el-form-item__label{
+    	text-align: center !important;
+    }
+</style>
+

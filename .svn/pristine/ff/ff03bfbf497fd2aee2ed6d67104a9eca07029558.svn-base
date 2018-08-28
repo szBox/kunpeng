@@ -1,0 +1,14 @@
+<template>
+	<div>
+		<s>
+			学生阅读档案
+		</s>
+		
+	</div>
+</template>
+
+<script>
+</script>
+
+<style>
+</style>

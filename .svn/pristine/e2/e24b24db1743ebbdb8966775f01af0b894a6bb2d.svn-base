@@ -1,0 +1,171 @@
+<template>
+    <div class="questType">
+        <div class="content">
+            <SearchForm :items="items" :showMessage="true" :inline="true" :model="search" ref="onSubmit"></SearchForm>
+            <div class="button-box">
+                <el-button v-has="10010301" type="primary" icon="el-icon-plus" @click="$router.push('/question/add')">添加</el-button>
+                <el-button type="danger" plain icon="el-icon-close" class="delectBatch" @click="delectAll(id)">批量删除</el-button>
+            </div>
+            <DataTable :loading="loading" :columns="columns" :data="data" :total="total" :page-size="search.size" @page-change="pageChange" @selection-change="selectionChange"></DataTable>
+        </div>
+    </div>
+</template>
+<script>
+
+    // 模块的引用
+    import SearchForm from '@components/search-form/index';
+    import DataTable from '@components/data-table/index'
+
+    //  接口
+    import questApi from '@src/network/subject/quest-setting/questions';
+
+    export default {
+        name: 'questType',
+        data: function () {
+            return {
+                search: {
+                    current: 1,  // 当前页数
+                    size: 10,   // 条数
+                    name: '',
+                    answerTypeId: 0,
+                    questionsTypeId: 0,
+                },
+                items: [
+                    {
+                        prop: 'name',
+                        type: 'input',
+                        label: '题型分类名称',
+                        rules: [
+                            {required: true, message: '位置不能为空'}
+                        ]
+                    },
+                    {
+                        type: 'action',
+                        actionList: [
+                            {
+                                text: '查询',
+                                btnType: 'primary',
+                                handleClick: (row) => {
+                                    this.questList();
+                                }
+                            }
+                        ]
+                    }
+                ],
+                // table的属性设置
+                columns: [
+                    {
+                        //  全选模块
+                        type: 'selection'
+                    },
+                    {
+                        label: '题型分类ID',
+                        prop: 'id'
+                    },
+                    {
+                        label: '阅读书籍名称',
+                        prop: 'name'
+                    },
+                    {
+                        label: '题目类型',
+                        prop: 'remark',
+                    },
+                    {
+                        label: '题型分类',
+                        prop: 'remark',
+                    },
+                    {
+                        label: '题目星级难度',
+                        prop: 'remark',
+                    },
+                    {
+                        label: '题目信息',
+                        prop: 'remark',
+                    },
+                    {
+                        type: 'action',
+                        width: '250',
+                        label: '操作',
+                        renderContent: (h, { row }) => {
+                            let toQusetEdit = () => {
+                                this.$router.push(
+                                    {
+                                        name: 'quset-edit',
+                                        query: row
+                                    }
+                                )
+                            }
+                            return [
+                                <el-button type='primary' size='mini' on-click={() => this.$router.push({ name: 'classilyView', params: { obj: row }})}>查看</el-button>,
+                            <el-button type='primary' size='mini' on-click={toQusetEdit}>更新</el-button>,
+                            <el-button type='danger' size='mini' on-click={() => this.global.deleteConfirm.call(this, this.delect, row.id)}>删除</el-button>
+                            ];
+                        }
+                    }
+                ],
+                data: [],
+                loading: true, //  加载缓冲
+                total: 0  // 总页数
+
+
+            }
+        },
+        components: {
+            SearchForm,
+            DataTable
+        },
+        methods: {
+            pageChange(index) {
+                this.search.current = index;
+                this.questList();
+            },
+            questList() {
+                let params = {
+                    ...this.search
+                };
+                this.loading = true;
+                questApi.list(params).then(res => {
+                    if(res.data.code === 0) {
+                        this.loading = false;
+                        this.data = res.data.data.records;
+                        this.total = this.data.length;
+                    }
+                })
+            },
+            delect(id){
+                questApi.del(id).then(res => {
+                    if(res.data.code === 0) {
+                        this.$message.success('删除成功');
+                        this.questList();
+                    }
+                })
+            },
+            delectAll(id){
+                questApi.del(id).then(res => {
+                    if(res.data.code === 0) {
+                        this.$message.success('删除成功');
+                        this.questList();
+                    }
+                })
+            }
+        },
+        mounted() {
+            this.questList();
+        },
+    }
+</script>
+<style lang="less">
+    .questType{
+    .bread-title{
+        padding: 10px 0 10px 20px;
+    .last >span{color: #474e5d;}
+    }
+    .content{
+        background-color: #ffffff;padding: 20px 18px;
+    .button-box{
+    .delectBatch{float: right}
+    }
+    }
+    }
+</style>
+

@@ -1,0 +1,36 @@
+
+const App = () => import(/* webpackChunkName: "main" */ '../general/app/index');
+const Login = () => import(/* webpackChunkName: "login" */ '../general/login');
+const Forget = () => import(/* webpackChunkName: "login" */ '../general/forget');
+const QuestentType = () => import(/* webpackChunkName: "login" */ '../general/app/questBank/questType');
+const Home = () => import(/* webpackChunkName: "login" */ '../general/app/home/index');
+const Setting = () => import(/* webpackChunkName: "setting" */ '../general/app/setting/index');
+
+import setting_children from './setting/index.js';
+const routes = [
+    {
+        path: '/',
+        component: App,
+        redirect: 'index',
+        children: [
+            { path: 'index', component: Home },
+            { path: 'setting', component: Setting, children: setting_children },
+            { path: 'subject', component: Setting },
+            { path: 'statisticss', component: Setting }
+        ]
+    },
+    {
+        path: '/login',
+        component: Login
+    },
+    {
+        path: '/forget',
+        component: Forget
+    },
+    {
+        path: '/questType',
+        component: QuestentType
+    }
+]
+
+export default routes;

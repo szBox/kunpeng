@@ -1,0 +1,284 @@
+<template>
+    <div class="questType">
+          <SearchForm :items="items" :showMessage="true" :inline="false" labelWidth="140px" :model="search" ref="functionAddForm"></SearchForm>
+          <topic :message="this.propsId" ref="functionId"></topic>
+          <div class="alertBox">
+                <el-dialog
+                    title="温馨提示"
+                    :visible.sync="prompt"
+                    width="30%"
+                    center>
+                    <span>试卷保存成功，名为：钢铁是怎样炼成的-试卷1，是否前往查看？</span>
+                    <span slot="footer" class="dialog-footer">
+                       <el-button type="primary">是</el-button>
+                       <el-button type="primary" @click="prompt = false">否</el-button>
+                    </span>
+                </el-dialog>
+            </div>
+    </div>
+</template>
+<script>
+
+    // 模块的引用
+    import SearchForm from '@components/search-form/index';
+    import Topic from '@components/topic/topic'
+
+    //  接口
+    import answerOption from '@src/network/subject/quest-setting/answer-public.js';
+    import setApi from '@src/network/subject/quest-setting/problemSet/automatic.js';
+
+    export default {
+        name: 'questType',
+        data: function () {
+            return {
+                prompt: false,
+                propsId: '',
+                search: {
+                    gradeId: '',
+                    readTypeId: '',
+                    readBookId: '',
+                    answerTime: '',
+                    thinking: null,
+                    memory: null,
+                    understand: null,
+                    score: '',
+                    gqTypeId: 1,
+                    amount: ''
+
+                },
+                items: [
+                    {
+                        prop: 'gradeId',
+                        type: 'select',
+                        label: '年级',
+                        placeholder: '请选择年级',
+                        options: [
+                        ],
+                        defaultProps: {
+                            id: 'id',
+                            label: 'name'
+                        },
+                        change: (val) => {
+                            this.readId();
+                            this.readingType();
+                            this.readingBook(val, this.search.readTypeId);
+                            this.$refs.functionId.readValue();
+//                            this.readValue()
+                        }
+                    },
+                    {
+                        prop: 'readTypeId',
+                        type: 'select',
+                        label: '阅读类型',
+                        placeholder: '请选择阅读类型',
+                        options: [
+                        ],
+                        defaultProps: {
+                            id: 'id',
+                            label: 'name'
+                        },
+                        change: (val) => {
+                            this.readingBook(this.search.gradeId, val);
+                        }
+                    },
+                    {
+                        prop: 'readBookId',
+                        type: 'select',
+                        label: '阅读书籍',
+                        placeholder: '请选择阅读书籍',
+                        options: [
+                        ],
+                        defaultProps: {
+                            id: 'id',
+                            label: 'name'
+                        }
+                    },
+                    {
+                        prop: 'answerTime',
+                        type: 'input',
+                        label: '答题时间：',
+                        rules: [
+                            {required: true, message: '位置不能为空'}
+                        ]
+                    },
+//                    {
+//                        label: '类型数量分配 ：'
+//                    },
+//                    {
+//                        prop: 'typeName',
+//                        type: 'input',
+//                        label: '记忆(5分)：',
+//                        rules: [
+//                            {required: true, message: '位置不能为空'}
+//                        ]
+//                    },
+//                    {
+//                        prop: 'understand',
+//                        type: 'input',
+//                        label: '理解(5分)：',
+//                        rules: [
+//                            {required: true, message: '位置不能为空'}
+//                        ]
+//                    },
+//                    {
+//                        prop: 'thinking',
+//                        type: 'input',
+//                        label: '思考(5分)：',
+//                        rules: [
+//                            {required: true, message: '位置不能为空'}
+//                        ]
+//                    },
+//                    {
+//                        prop: 'score',
+//                        type: 'text',
+//                        label: '试卷总分：',
+//                        rules: [
+//                            {required: true, message: '位置不能为空'}
+//                        ]
+//                    },
+//                    {
+//                        prop: 'amount',
+//                        type: 'text',
+//                        label: '题目总数量：',
+//                        rules: [
+//                            {required: true, message: '位置不能为空'}
+//                        ]
+//                    },
+//                    {
+//                        type: 'action',
+//                        actionList: [
+//                            {
+//                                text: '生成试卷',
+//                                btnType: 'primary',
+//                                handleClick: (row) => {
+//                                    this.global.formValidate.call(this,'functionAddForm', this.save);
+//                                }
+//                            },
+//                        ]
+//                    }
+                ],
+                // table的属性设置
+                data: [],
+                loading: true, //  加载缓冲
+                total: 0  // 总页数
+            }
+        },
+        components: {
+            SearchForm,
+            Topic
+        },
+        methods: {
+            pageChange(index) {
+                this.search.current = index;
+                this.questList();
+            },
+            readId() {
+                this.propsId = this.search.gradeId + 1
+            },
+            // 阅读类型下拉
+            readingType () {
+                let params = {current: 1, size: 10, gradeId: ''}
+                answerOption.readingType(params).then(res => {
+                    if(res.data.code === 0) {
+                        this.items[1].options  = res.data.data.records
+//                        console.log(this.$refs.functionId,'44480')
+                    }
+                })
+            },
+            // 阅读图书下拉
+            readingBook (gradeId, readTypeId) {
+                let params = {gradeId,readTypeId}
+                answerOption.readingBooks(params).then(res => {
+                     if(res.data.code === 0) {
+                       this.items[2].options  = res.data.data
+                     }
+                })
+            },
+            // 类型对应分值
+//            readValue () {
+//               let params = {gradeId: this.search.gradeId ? this.search.gradeId : 0}
+//                setApi.readValue(params).then(res => {
+//                    if(res.data.code === 0) {
+//                        let value = 10;
+//                        this.items[5].label = `记忆(${value}分)`;
+//                        this.search.typeId = res.data.data.typeId;
+//                        this.search.typeName = res.data.data.typeName;
+//                        value = res.data.data.value
+//                    }
+//                })
+//            },
+            save () {
+                let params = {
+                    tpRankList: [
+                        {typeId: 1, typeName: this.search.memory},
+                        {typeId: 2, typeName: this.search.understand},
+                    ],
+                    gradeId: this.search.gradeId,
+                    readTypeId: this.search.readTypeId,
+                    readBookId: this.search.readBookId,
+                    answerTime: this.search.answerTime,
+                    score: this.search.score,
+                    gqTypeId: 1,
+                    amount: this.search.amount
+                };
+                setApi.add(params).then(res => {
+                    if(res.data.code === 0) {
+                        this.$message.success('提交成功');
+                        this.prompt = true
+                    } else {
+                        this.$message.success('生成失败')
+                    }
+                })
+            }
+        },
+        mounted() {
+            this.items[0].options = this.global.session.get('gradeList')
+//            // 对应分值
+//            this.readValue()
+
+        },
+        created() {
+        }
+//        computed: {
+//            // 总分
+//            score: {
+//                get () {
+//                   return (this.search.thinking * 5) + (this.search.memory * 5) + (this.search.understand * 5)
+//                }
+//            },
+//            // 总数量
+//            amount: {
+//                get () {
+//                    return parseInt(this.search.thinking ? this.search.thinking : 0) + parseInt(this.search.memory ? this.search.memory : 0) + parseInt(this.search.understand ? this.search.understand : 0)
+//                }
+//            }
+//        },
+//        // 监听数据变化
+//        watch: {
+//            score (value) {
+//                console.log(value,'111')
+//                this.search.score = value
+//            },
+//            amount (value) {
+//                console.log(value,'112')
+//                this.search.amount = value
+//            }
+//        }
+    }
+</script>
+<style lang="less" type="text/less">
+    .questType{
+    .bread-title{
+        padding: 10px 0 10px 20px;
+    .last >span{color: #474e5d;}
+    }
+    .content{
+        background-color: #ffffff;
+        padding: 40px 60px;
+    .button-box{
+    .delectBatch{float: right}
+    }
+    }
+    }
+</style>
+

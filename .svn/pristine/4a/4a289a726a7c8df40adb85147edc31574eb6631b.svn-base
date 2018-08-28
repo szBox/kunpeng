@@ -1,0 +1,248 @@
+<template>
+    <div class="function-add">
+        <SearchForm :items="items" :showMessage="true" :inline="false" labelWidth="120px" :model="search" ref="functionAddForm"></SearchForm>
+        <div class="alertBox">
+            <el-dialog :visible.sync="dialogFormVisible">
+                <SearchForm :items="items2" :showMessage="true" :inline="false" labelWidth="120px" :model="form"></SearchForm>
+                <div slot="footer" class="dialog-footer">
+                    <el-button @click="dialogFormVisible = false">取 消</el-button>
+                    <el-button type="primary" @click="dialogFormVisible = false">确 定</el-button>
+                </div>
+            </el-dialog>
+        </div>
+    </div>
+</template>
+<script>
+    import SearchForm from '@components/search-form/index';
+
+    import questApi from '@src/network/subject/quest-setting/questions';
+    //  答题类型
+    import answerOption from '@src/network/subject/quest-setting/answer-public.js';
+
+    export default {
+        data() {
+            return {
+                dialogFormVisible: true,
+                search: {
+                    answerTypeId: '',
+                    choices: [],
+                    correctChoiceIds: [],
+                    anstname: '',
+                    bookName: '',
+                    id: 0,
+                    name: '',
+                    qyname: '',
+                    imageUrl: '',
+                    insertTime: '',
+                    questionsRankId: 1,
+                    questionsTypeId: '',
+                    readBookId: '2'
+                },
+                items: [
+                    {
+                        prop: 'bookName',
+                        type: 'input',
+                        label: '阅读书籍名称',
+                        placeholder: '请选择书籍名称',
+                        rules: [
+                            {required: true, message: '书籍名称不能为空'}
+                        ],
+                        addition: () => {
+                            return [
+                                <el-button type="warning" on-click={() => this.chooseBook()} style="margin-left: 20px;">打开</el-button>
+                            ]
+                        }
+                    },
+                      {
+                          prop: 'questionsTypeId',
+                          type: 'select',
+                          label: '题目类型',
+                          placeholder: '请选择题目类型',
+                          rules: [
+                              {required: true, message: '题目类型不能为空'}
+                          ],
+                          options: [
+
+                          ],
+                          defaultProps: {
+                              id: 'id',
+                              label: 'name'
+                          }
+                      },
+                    {
+                        label: '题目星级名称',
+                        prop: 'questionsRankId',
+                        renderContent: (h, {row}) => {
+                            return (
+                                <el-rate value={row.questionsRankId} disabled text-color="#ff9900"></el-rate>
+                            )
+                        }
+                    },
+                    {
+                        prop: 'anstname',
+                        type: 'input',
+                        label: '题目'
+                    },
+                    {
+                        prop: 'imageUrl',
+                        type: 'upload',
+                        label: '图片',
+                        limit: 1, //文件最大上传个数
+                        fileList:[]
+                    },
+                    {
+                        prop: 'choices',
+                        placeholder: 'A:',
+                        type: 'input',
+                        label: '选择答案'
+                     },
+                    {
+                        type: 'input',
+                        placeholder: 'B:',
+                    },
+                    {
+                        prop: 'anstname',
+                        type: 'input',
+                        placeholder: 'C:',
+                    },
+                    {
+                        prop: 'anstname',
+                        type: 'input',
+                        placeholder: 'D:',
+                    },
+                    {
+                        prop: 'correctChoiceIds',
+                        type: 'radio',
+                        label: '正确答案',
+                        rules: [
+                            {required: true, message: '位置不能为空'}
+                        ],
+                        options: [
+                            {value: 1, text: 'A'},
+                            {value: 2, text: 'B'},
+                            {value: 3, text: 'C'},
+                            {value: 4, text: 'D'}
+                        ]
+                    },
+                    {
+                        type: 'action',
+                        actionList: [
+                            {
+                                text: '提交',
+                                btnType: 'primary',
+                                handleClick: (row) => {
+                                    this.global.formValidate.call(this,'functionAddForm', this.save);
+                                }
+                            },
+                            {
+                                text: '返回',
+                                btnType: 'primary',
+                                handleClick: (row) => {
+                                    this.$router.go(-1);
+                                }
+                            }
+                        ]
+                    }
+                ],
+                form: {
+                    gradeId: '',
+                    readTypeId: ''
+
+                },
+                items2: [
+                    {
+                        prop: 'gradeId',
+                        type: 'select',
+                        label: '阅读年级',
+                        placeholder: '请选择',
+                        rules: [
+                            {required: true, message: '阅读年级不能为空'}
+                        ],
+                        options: [
+
+                        ],
+                        defaultProps: {
+                            id: 'id',
+                            label: 'name'
+                        }
+                    },
+                    {
+                        prop: 'readTypeId',
+                        type: 'select',
+                        label: '阅读类型',
+                        placeholder: '请选择',
+                        rules: [
+                            {required: true, message: '阅读年级不能为空'}
+                        ],
+                        options: [
+
+                        ],
+                        defaultProps: {
+                            id: 'id',
+                            label: 'name'
+                        }
+                    },
+                    {
+                       prop: 'booksName',
+                       type: 'input',
+                       label: '书籍名称',
+                        addition: () => {
+                            return [
+                                <el-button type="primary" on-click={() => this.checkBook()} style="margin-left: 20px;">查询</el-button>
+                            ]
+                        }
+                    },
+                ]
+            }
+        },
+        methods: {
+            readingType () {
+                let params = {current: 1, size: 10, name: ''}
+                    answerOption.readingType(params).then(res => {
+                    if(res.data.code === 0) {
+                        this.options2 = res.data.data.records
+                    }
+                })
+            },
+            // 弹框
+            chooseBook () {
+                this.dialogFormVisible = true;
+            },
+            // 阅读类型
+            allType() {
+                answerOption.answerType().then(res => {
+                    if(res.data.code === 0) {
+                        this.items2[1].options = res.data.data
+                    }
+                })
+            },
+            // 查询书籍
+            checkBook() {
+                let params = {
+                    ...this.form
+                };
+                answerOption.readingBooks(params).then(res => {
+                    if(res.data.code === 0) {
+                        console.log('1')
+                    }
+                })
+            },
+        },
+        mounted(){
+            this.items2[0].options = this.global.session.get('gradeList')
+        },
+        created() {
+              this.allType();
+              this.readingType()
+        },
+        components: {
+            SearchForm
+        }
+    }
+</script>
+<style lang="less" scoped>
+    .function-add{
+        padding: 40px;
+    }
+</style>
+

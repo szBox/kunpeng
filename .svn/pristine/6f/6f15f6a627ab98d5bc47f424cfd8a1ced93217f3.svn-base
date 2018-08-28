@@ -1,0 +1,264 @@
+<template>
+	<div>
+		<SearchForm :items="items" :showMessage="true" :inline="true" labelWidth="" :model="search" ref="locationAddForm"></SearchForm>
+		<DataTable :loading="loading" :columns="columns" :data="data" :total="total" :page-size="search.size" @page-change="pageChange"></DataTable>
+	</div>
+
+</template>
+
+<script>
+	import DataTable from '@components/data-table/index';
+	import SearchForm from '@components/search-form/index';
+	import home from '@src/network/home/home.js';
+	import statistics from '@src/network/statistics/statistics.js'
+
+	export default {
+		data() {
+			return {
+				search: {
+					bookName: "",
+					classId: '',
+					gradeId: '',
+					studentName: "",
+					current: 1,
+					size:6,
+					studentId: '',
+				},
+				
+				items: [
+                    {
+                        prop: 'gradeId',
+                        type: 'select',
+                        label: '年级',
+                        value:'',
+//                      rules: [
+//                          {required: true, message: '位置不能为空'}
+//                      ],
+                        options: [
+                        ],
+                        defaultProps: {
+                        	id: 'id',
+                        	label: 'name'
+                        },
+                        hasAll: true,
+                        change: (val) => {
+                            this.classList(val);
+                        }
+                    },
+//                  {
+//                      prop: 'classId',
+//                      type: 'select',
+//                      label: '班级',
+//                      options: [  
+//                      ],
+//                      defaultProps: {
+//                      	id: 'id',
+//                      	label: 'name'
+//                      },
+//                      hasAll: true
+//                  },
+                    
+                    {
+                        prop: 'studentName',
+                        type: 'input',
+                        label: '学生姓名',
+                    },
+//                  {
+//                      prop: 'studentId',
+//                      type: 'input',
+//                      label: '学号',
+//                  },
+                    {
+                        type: 'action',
+                        actionList: [
+                            {
+                                text: '查询',
+                                btnType: 'warning',
+                                handleClick: () => {
+									this.tableList()
+//                                  this.formValidate('locationAddForm', this.save);
+                                }
+                            },
+                            
+                        ]
+                    }
+                ],
+				columns: [
+					{
+						label: '学号',
+						prop: 'stuId'
+					},
+					{
+						label: '学生姓名',
+						prop: 'name'
+					},
+					{
+						label: '阅读年级',
+						prop: 'gradeName'
+					},
+					{
+						label: '阅读书籍总数',
+						prop: 'readBookCount'
+					},
+					{
+						label: '答题总分数',
+						prop: 'scoreCount'
+					},
+					{
+						label:'阅读评价',
+						prop: 'evaluate',
+						renderContent: (h, { row }) => {
+							if(row.evaluate==null){
+								return ('暂无评价')
+							}else{
+								return (row.evaluate)
+							}
+//							return row.evaluate.map(q => {
+//								 return ({q})
+//							})
+//                          return [
+//                              <el-button type='primary' size='mini' on-click={() => this.$router.push('function/add/' + row.id)}>添加子菜单</el-button>,
+//                              <el-button type='primary' size='mini' on-click={() => this.$router.push({ name: '更新功能模块', params: { obj: row }})}>更新</el-button>,
+//                              <el-button type='danger' size='mini' on-click={() => this.global.deleteConfirm.call(this, this.deleteOne, row.id)}>删除</el-button>
+//                          ];
+                        }
+					},
+					{
+						label: '操作',
+						type: 'action',
+						renderContent: (h, { row }) => {
+							if(row.evaluate==null){
+								return [
+									<el-button type='primary' on-click={() => this.speakAdd(row.stuId)}  size='mini' >评价</el-button>,
+									<el-button type='' style='border:1px solid #409EFF; color:#409EFF' size='mini' on-click={() => this.$router.push({ name: 'adminStuInfo', params: { stuId: row.stuId }})}>查看</el-button>,
+								]
+							}else{
+								return [
+									<el-button type='' on-click={() => this.speakEdit(row.stuId,row.evaluate)} style='background:#FF9900; color:#fff; border:none' size='mini'>修改</el-button>,
+									<el-button type='' style='border:1px solid #409EFF; color:#409EFF' size='mini' on-click={() => this.$router.push({ name: 'adminStuInfo', params: { stuId: row.stuId }})}>查看</el-button>,
+								]
+								
+							}
+                          
+                        }
+					},
+				],
+				data: [],
+				total: 0,
+				loading: true
+			}
+		},
+		methods: {
+			pageChange(index) {
+				this.search.current = index;
+				this.tableList();
+			},
+			
+			tableList() {
+				statistics.table3(this.search).then(res => {
+                    console.log('学生阅读档案 表格',res)  //接受到的参数
+					if(res.data.code === 0) {
+						this.loading = false;
+						this.data = res.data.data.records;
+                        this.total =  res.data.data.total;
+                    }
+                    
+                })
+           },
+			classList(){
+				let params = {
+					sid:this.global.session.get('user').sid,
+					gid:this.search.gradeId
+				};
+				home.classList(params).then(res => {
+                    console.log('班级下拉 列表',res)  //接受到的参数
+					if(res.data.code === 0) {
+						this.items[1].options = res.data.data;
+                    }
+                    
+                })
+			},
+			
+		      speakAdd(id) {
+		      	
+		        this.$prompt('请输入评价', '', {
+		            inputType:'textarea',
+		            confirmButtonText: '确定',
+		            cancelButtonText: '取消',
+		        }).then(({ value }) => {
+		            let paramsAdd = {
+					    evaluate: value,
+  					    studentId: id
+				    };
+				    statistics.speakAdd(paramsAdd).then(res => {
+	                    console.log('平路 列表',res)  //接受到的参数
+						if(res.data.code === 0) {
+							this.tableList()
+	                    }
+                    
+                    })
+		          	this.$message({
+		           		type: 'success',
+//		            message: '你的邮箱是: ' + value
+					    message:'评价成功'
+		            });
+		        }).catch(() => {
+		            this.$message({
+		                type: 'info',
+		                message: '取消评论'
+		            });       
+		        });
+		     },
+		     speakEdit(id,valueBB){
+		     	this.$prompt('编辑评价', '',{
+		            inputType:'textarea',
+		            inputValue:valueBB,
+		            confirmButtonText: '确定',
+		            cancelButtonText: '取消'
+		        }).then(({ value }) => {
+		        	
+		            let paramsEdit = {
+					    evaluate: value,
+  					    studentId: id
+				    };
+				    statistics.speakEdit(paramsEdit).then(res => {
+	                    console.log('平路 列表',res)  //接受到的参数
+						if(res.data.code === 0) {
+							this.tableList()
+	                    }
+                    
+                    })
+		          	this.$message({
+		           		type: 'success',
+//		            message: '你的邮箱是: ' + value
+					    message:'评价成功'
+		            });
+		        }).catch(() => {
+		            this.$message({
+		                type: 'info',
+		                message: '取消编辑'
+		            });       
+		        });
+		     }
+    
+		},
+		mounted() {
+			this.items[0].options = this.global.session.get('gradeList') ;
+			this.tableList()
+			this.classList()
+		},
+		components: {
+			DataTable,
+			SearchForm
+		}
+	}
+</script>
+<style>
+	
+</style>
+
+<style lang="less" scoped>
+
+	
+</style>
+

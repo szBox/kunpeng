@@ -1,0 +1,84 @@
+
+import OSS from 'ali-oss';
+const global = {
+    session: {
+        set(key, val) {
+            sessionStorage.setItem(key, JSON.stringify(val));
+        },
+        get(key) {
+            return JSON.parse(sessionStorage.getItem(key)) || {};
+        },
+        clear() {
+            sessionStorage.clear();
+        }
+    },
+    menu: {
+        get(menu) {
+            return global.session.get('user').menus || [];
+        }
+    },
+    //验证提示
+    formValidate (target, fun) {
+        this.$refs[target].$refs['form'].validate((valid) => {
+            if (valid) {
+                fun();
+            } else {
+                return false;
+            }
+        });
+    },
+     //删除提示
+ 	deleteConfirm  (fun, parmas) {
+        this.$confirm('确定删除吗？' , '提示', {
+          confirmButtonText: '确定',
+          cancelButtonText: '取消',
+          type: 'warning'
+        }).then(() => {
+          fun(parmas);
+        }).catch(() => {
+          this.$message({
+            type: 'info',
+            message: '已取消删除'
+          });
+        });
+      },
+	//获取当前时间，格式yyyy-MM-dd
+	getNowDate () {
+		let today = new Date();
+		return `${today.getFullYear()}-${today.getMonth() + 1}-${today.getDate()}`;
+	},
+	alyConfig : {
+      region: 'oss-cn-shenzhen',
+      accessKeyId: 'FN5pVhS5XZLsdOb9',
+      accessKeySecret: 'GshUhE05420TGLUu4y4CDus5z3A7qH',
+      bucket: 'hyjy',
+      newClient(){
+        return new OSS.Wrapper({
+          region: this.region,
+          accessKeyId: this.accessKeyId,
+          accessKeySecret: this.accessKeySecret,
+          bucket: this.bucket
+        });
+      },
+      uploadToAliyun(f, k, progress){
+        let file = f, key = k || 'newFiles/' + new Date().getTime()
+        let client = this.newClient()
+        return client.multipartUpload(key, file, {
+          progress: function (p) {
+            return function (done) {
+              if (progress) {
+
+                progress(p)
+              }
+              done();
+            }
+          }
+        })
+      }
+    }
+}
+
+
+
+
+export default global;

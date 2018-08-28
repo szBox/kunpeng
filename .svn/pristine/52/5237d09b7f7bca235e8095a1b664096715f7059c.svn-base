@@ -1,0 +1,49 @@
+<template>
+	<div class="answer-options">
+		<div class="input-list" v-for="(item, index) in options" :key="index">
+			<el-input v-model="item.value" class="my-input">
+			    <template slot="prepend">{{optionTitle[index]}}:</template>
+		  	</el-input>
+		  	<i class="el-icon-remove" v-if="index > 1" @click="remove(index)"></i>
+		  	<i class="el-icon-circle-plus" v-if="index == options.length - 1" @click="add()"></i>
+		</div>
+	</div>
+</template>
+
+<script>
+	export default {
+		name: 'answer-options',
+		props: {
+			value: Array,
+			options: {
+				type: Array,
+				default () {return []}
+			}
+		},
+		data() {
+			return {
+				optionTitle: ['A','B','C','D','E','F','G']
+			}
+		},
+		methods: {
+			remove(index) {
+				this.options.splice(index, 1);
+			},
+			add() {}
+		}
+	}
+</script>
+
+<style lang="less" scoped>
+	.answer-options{
+		.input-list{
+			margin-bottom: 10px;
+			i{
+				display: inline-block;
+				vertical-align: middle;
+				font-size: 35px;
+				cursor: pointer;
+			}
+		}
+	}
+</style>

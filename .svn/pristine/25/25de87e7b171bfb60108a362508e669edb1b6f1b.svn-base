@@ -1,0 +1,29 @@
+
+
+const Outer = { template: '<router-view></router-view>' };
+const Info = () => import(/* webpackChunkName: "info" */ '../general/info/index');
+const Test = () => import(/* webpackChunkName: "test" */ '../general/test/index');
+const App = () => import(/* webpackChunkName: "main" */ '../general/app/index');
+const Login = () => import(/* webpackChunkName: "login" */ '../general/login')
+const routes = [
+    {
+        path: '/',
+        redirect:'/login',
+    },
+    {
+        path: '/admin',
+        component: Outer,
+        children: [
+            // 嵌套路由 https://github.com/vuejs/vue-router/blob/next-doc/docs/en/advanced-routing/nested.md
+            { path: '', component: App },
+            { path: 'info', component: Info },
+            { path: 'test', component: Test }
+        ]
+    },
+    {
+        path: '/login',
+        component: Login
+    }
+]
+
+export default routes;

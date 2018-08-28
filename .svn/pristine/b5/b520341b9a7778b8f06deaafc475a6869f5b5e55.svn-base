@@ -1,0 +1,12 @@
+
+import network from '../index';
+// 年级列表
+export default {
+    async gradeList (params) {
+        const res = await network.get({
+            url: 'grade/options',
+            data: params
+        });
+        return res;
+    }
+}

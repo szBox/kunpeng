@@ -1,0 +1,40 @@
+h3{
+    color: red;
+    display: flex;
+    font-size: 18px;
+    margin: 10px;
+}
+
+.doc, a{
+    color: red;
+    margin: 10px;
+}
+
+.time{
+    margin: 10px;
+    span:last-child {
+        color: blue;
+        cursor: pointer;
+        padding-left: 10px;
+    }
+}
+
+// switch
+.el-switch{
+    margin-right: 10px;
+}
+ul,li{
+    list-style: none;
+}
+
+
+//弹窗
+.el-dialog__body{
+    overflow: hidden;
+}
+//试卷  修改题目
+.answer-form .el-form-item__label:before {
+    content: '*';
+    color: #f56c6c;
+    margin-right: 4px;
+}

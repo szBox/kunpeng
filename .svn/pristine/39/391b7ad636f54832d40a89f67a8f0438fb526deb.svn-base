@@ -1,0 +1,174 @@
+<template>
+	<div>
+		<SearchForm :items="items" :showMessage="true" :inline="true" labelWidth="" :model="search" ref="locationAddForm"></SearchForm>
+		
+		
+		<div class="button-box">
+            <el-button @click='goAdd()' type='primary' icon="el-icon-plus" class='btn-add' style='margin-bottom: 15px;'>添加</el-button>
+           
+            <el-button @click="() => global.deleteConfirm.call(this,delectAll(id))" type="danger" plain icon="el-icon-close" class="btn-delete" >批量删除</el-button>
+        </div>
+		
+		<DataTable :loading="loading" :columns="columns" :data="data" :total="total" :page-size="search.size" @page-change="pageChange"  @selection-change="selectionChange"></DataTable>
+		
+	</div>
+
+</template>
+
+<script>
+	import DataTable from '@components/data-table/index';
+	import SearchForm from '@components/search-form/index';
+	import booksType from '@src/network/books/booksType.js';
+	export default {
+		data() {
+			return {
+				search: {				
+					typeId:'',
+					name: "",
+					sid: this.global.session.get('user').sid,
+					current: 1,
+					size:6
+				},
+				
+				items: [
+                    
+                    {
+                        prop: 'typeId',
+                        type: 'select',
+                        label: '推荐类型',
+                        options: [  
+                        ],
+                        defaultProps: {
+                        	id: 'id',
+                        	label: 'name'
+                        },
+                        hasAll: true
+                    },
+   
+                    {
+                        type: 'action',
+                        actionList: [
+                            {
+                                text: '查询',
+                                btnType: 'warning',
+                                handleClick: () => {
+									this.tableList()
+//                                  this.formValidate('locationAddForm', this.save);
+                                }
+                            },
+                            
+                        ]
+                    }
+                ],
+				columns: [
+					{
+						//  全选模块
+                        type: 'selection'	
+					},
+					
+					{
+						label: '推荐ID',
+						prop: 'id'
+					},
+					
+					
+					{
+						label: '推荐类别',
+						prop: 'name'
+					},
+					{
+						label: '添加时间',
+						prop: 'typeName'
+					},
+				
+
+					{
+						label: '操作',
+						type: 'action',
+						width:'260px',
+						renderContent: (h, { row }) => {
+							return [
+								<el-button type='primary' on-click={() => this.$router.push({ name: 'booksTypeSee', params: { init: row}})}  size='mini'>查看</el-button>,
+								<el-button type='' on-click={() => this.$router.push({ name: 'booksTypeEdit', params: { init: row }})} style='border:1px solid #409EFF; color:#409EFF' size='mini' >更新</el-button>,
+								<el-button type='' on-click={() => this.global.deleteConfirm.call(this, this.delect, row.id)} style='border:1px solid #F46C6C; color:#F46C6C' size='mini' >删除</el-button>,
+							]
+                        }
+					},
+				],
+				data: [],
+				total: 0,
+				loading: true
+			}
+		},
+		methods: {
+			pageChange(index) {
+				this.search.current = index;
+				this.tableList();
+			},
+			
+			tableList() {
+				booksType.booksTyesList(this.search).then(res => {
+                    console.log('推荐管理表格',res)  //接受到的参数
+					if(res.data.code === 0) {
+						this.loading = false;
+						this.data = res.data.data.records;
+						this.items[0].options=res.data.data.records;
+                        this.total =  res.data.data.total;
+                    }
+                    
+                })
+            },
+           	delect(id){
+           		booksType.Delete(id).then(res => {
+					if(res.data.code === 0) {
+						this.$message.success('删除成功');
+						this.tableList()
+                    }
+                    
+                })
+				
+           	},
+           	delectAll(id) {
+           		booksAdmin.Delete(id).then(res => {
+					if(res.data.code === 0) {
+						this.$message.success('删除成功');
+						this.tableList()
+                    }
+                    
+                })
+           	},
+			goAdd(){
+				this.$router.push({
+					name: 'booksTypeAdd'
+				})
+			},
+			
+    
+		},
+		mounted() {
+			
+			this.tableList()
+		
+		},
+		components: {
+			DataTable,
+			SearchForm
+		}
+	}
+</script>
+<style>
+	
+</style>
+
+<style lang="less" scoped>
+	.button-box{
+    	.btn-add{
+    		float: left;
+    	}
+    	.btn-delete{
+    		float:right
+    	}
+    }
+	
+</style>
+

@@ -1,0 +1,55 @@
+<template>
+  <div class="add-edit-form-box">
+    <el-form>
+      <el-form-item>
+        <template>教师身份名称：<span>{{identity.name}}</span></template>
+      </el-form-item>
+      <el-form-item>
+        <template>身份类型：<span v-if="identity.type==1">教师</span><span v-else>学生</span></template>
+      </el-form-item>
+      <el-form-item>
+        <template>描述：<span>{{identity.remark}}</span></template>
+      </el-form-item>
+      <el-form-item>
+        <template>新增时间：<span>{{identity.insertTime | formatDate }}</span></template>
+      </el-form-item>
+      <el-form-item>
+        <el-button type="primary" @click="$routerGo(-1)">返回</el-button>
+      </el-form-item>
+    </el-form>
+  </div>
+</template>
+<script>
+  import * as identity from '@/API/settings/right/identity.js';
+  import {formatDate} from '@/assets/js/filters.js';
+  export default {
+    data() {
+      return {
+        identity: {}
+      };
+    },
+    created(){
+      let vm = this, id = this.$route.params.id;
+      this.initIdentity(id);
+    },
+    methods: {
+      initIdentity(id){
+        let vm = this;
+        identity.detail.r(id).then(function(res){
+          if(res.data.code == 0){
+            vm.identity = res.data.data;
+          }
+        })
+      }
+    },
+    filters:{
+      formatDate: function(time){
+        let date = new Date(time);
+        return formatDate(date,'yyyy-MM-dd hh:mm:ss');
+      }
+    }
+  }
+</script>
+<style>
+
+</style>

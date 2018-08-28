@@ -1,0 +1,337 @@
+<template>
+    <div class="questType">
+          <SearchForm :items="items" :showMessage="true" :inline="false" labelWidth="140px" :model="search" ref="functionAddForm"></SearchForm>
+          <div class="alertBox">
+                <el-dialog :visible.sync="centerDialogVisible" class="top">
+                    <div class="top">
+                        <span class="title">共勾选: {{titleList}}道题</span>
+                        <span class="title">共:{{totalScoreAll}} 分</span>
+                        <SearchForm :items="items2" :showMessage="true" :inline="true"  :model="search2" style="float: right"></SearchForm>
+                    </div>
+                    <el-table
+                        @selection-change="chooseQust"
+                        :data="form">
+                        <el-table-column  type="selection">
+                        </el-table-column>
+                        <el-table-column
+                            prop="name"
+                            width="120">
+                        </el-table-column>
+                        <el-table-column  prop="value">
+                        </el-table-column>
+                    </el-table>
+                    <div slot="footer" class="dialog-footer">
+                        <el-button @click="centerDialogVisible = false">取 消</el-button>
+                        <el-button type="primary" @click="centerDialogVisible = false">确 定</el-button>
+                    </div>
+                </el-dialog>
+            </div>
+          <div class="alertBox2">
+              <el-dialog
+                  title="提示"
+                  :visible.sync="dialogVisible"
+                  width="30%"
+                  :before-close="handleClose">
+                  <span>
+                      试卷保存成功，名为：钢铁是怎样炼成的-试卷1，是否前往查看？
+                  </span>
+                  <span slot="footer" class="dialog-footer">
+                      <el-button @click="dialogVisible = false">取 消</el-button>
+                      <el-button type="primary" @click="dialogVisible = false">确 定</el-button>
+                   </span>
+              </el-dialog>
+          </div>
+    </div>
+</template>
+<script>
+
+    // 模块的引用
+    import SearchForm from '@components/search-form/index';
+
+    //  接口
+    import answerOption from '@src/network/subject/quest-setting/answer-public.js';
+
+    export default {
+        name: 'questType',
+        data: function () {
+            return {
+                idList: [], // 保存题目id
+                titleList: 0, // 总数量
+                totalScore: [],  //  对应分值
+                totalScoreAll: 0, //总分
+                centerDialogVisible: false,
+                dialogVisible: false,
+                search: {
+                    current: 1,
+                    id: '',
+                    size: 10,
+                    gradeId: '',
+                    readTypeId: '',
+                    readBookId: '',
+                    gradeName: '',
+                    amount: '',
+                    score: ''
+                },
+                search2: {
+                    gptypeName: '',
+                    id: ''
+                },
+                form: [],
+                items: [
+                    {
+                        prop: 'gradeId',
+                        type: 'select',
+                        label: '年级',
+                        placeholder: '请选择年级',
+                        options: [
+                        ],
+                        defaultProps: {
+                            id: 'id',
+                            label: 'name'
+                        },
+                        change: (val) => {
+                            this.readingType();
+                            this.readingBook(val, this.search.name);
+                        }
+                    },
+                    {
+                        prop: 'readTypeId',
+                        type: 'select',
+                        label: '阅读类型',
+                        placeholder: '请选择阅读类型',
+                        options: [
+                        ],
+                        defaultProps: {
+                            id: 'id',
+                            label: 'name'
+                        },
+                        change: (val) => {
+                            this.readingBook(this.search.gradeId, val);
+                        }
+                    },
+                    {
+                        prop: 'readBookId',
+                        type: 'select',
+                        label: '阅读书籍',
+                        placeholder: '请选择阅读书籍',
+                        options: [
+                        ],
+                        defaultProps: {
+                            id: 'id',
+                            label: 'name'
+                        }
+                    },
+                    {
+                        prop: 'time',
+                        type: 'input',
+                        label: '答题时间：',
+                        rules: [
+                            {required: true, message: '位置不能为空'}
+                        ]
+                    },
+                    {
+                        prop: 'amount',
+                        type: 'text',
+                        label: '题目总数量：',
+                        rules: [
+                            {required: true, message: '位置不能为空'}
+                        ]
+                    },
+                    {
+                        prop: 'score',
+                        type: 'text',
+                        label: '试卷总分：',
+                        rules: [
+                            {required: true, message: '位置不能为空'}
+                        ]
+                    },
+                    {
+                        prop: 'booksName',
+                        type: 'text',
+                        label: '已勾选:',
+                        addition: (h) => {
+                            return [
+                                <el-button type="primary" on-click={() => this.checkQust()} style="margin-left: 20px;">查询</el-button>
+                            ]
+                        }
+                    },
+                    {
+                        type: 'action',
+                        actionList: [
+                            {
+                                text: '提交',
+                                btnType: 'primary',
+                                handleClick: (row) => {
+                                    this.global.formValidate.call(this,'functionAddForm', this.save);
+                                }
+                            },
+                        ]
+                    }
+                ],
+                items2: [
+                    {
+                        prop: 'id',
+                        type: 'select',
+                        label: '题目类型',
+                        placeholder: '请选择',
+                        options: [
+
+                        ],
+                        defaultProps: {
+                            id: 'id',
+                            label: 'name'
+                        }
+                    },
+                    {
+                        type: 'action',
+                        actionList: [
+                            {
+                                text: '查询',
+                                btnType: 'primary',
+                                handleClick: (row) => {
+                                    this.getTitle()
+                                }
+                            }
+                        ]
+                    }
+                ],
+                // table的属性设置
+                data: [],
+                loading: true, //  加载缓冲
+                total: 0  // 总页数,
+
+
+            }
+        },
+        components: {
+            SearchForm
+        },
+        methods: {
+            // 阅读类型下拉
+            readingType () {
+                let params = {current: 1, size: 10, gradeId: ''}
+                answerOption.readingType(params).then(res => {
+                    if(res.data.code === 0) {
+                        this.items[1].options  = res.data.data.records
+                    }
+                })
+            },
+            // 题目类型
+            questType () {
+                answerOption.questType().then(res => {
+                    if(res.data.code === 0) {
+                        console.log(res.data.data,'题目类型');
+                        this.items2[0].options = res.data.data
+                    }
+                })
+            },
+            // 阅读书籍名称
+            readingBook (gradeId, readTypeId) {
+                let params = {gradeId,readTypeId}
+                answerOption.readingBooks(params).then(res => {
+                    if(res.data.code === 0) {
+                        this.items[2].options  = res.data.data
+                    }
+                })
+            },
+            // 选择题目
+            checkQust () {
+                this.centerDialogVisible = true;
+                this.getTitle()
+            },
+            // 获取问题
+            getTitle () {
+                let params = {
+                    readBookId: this.search.id,
+                };
+                if (this.search2.id) {
+                    params.questionsTypeId = this.search2.id;
+                    console.log(this.search2.id,'id')
+                } else{
+                    params.questionsTypeId = ''
+                }
+                answerOption.questAll(params).then(res => {
+                    if(res.data.code == 0) {
+                        this.form = res.data.data
+
+                    }
+                })
+            },
+            // 获取选择问题对应Id
+            chooseQust(selection){
+                this.idList = [];   // 清空数组
+                this.totalScore = [];
+                selection.map(value => {
+                    this.idList.push(value.id);
+                    this.totalScore.push(value.value);
+                });
+                this.titleList = this.idList.length;  //  数量
+                this.search.amount = this.idList.length;
+                  let s = 0;
+                for (var i= this.totalScore.length-1; i>=0; i--) {
+                    s += this.totalScore[i];
+                    this.totalScoreAll = s;
+                    this.search.score = s
+                }
+//                console.log( s,'22')  // 总分
+            },
+
+//            "amount": 0,
+//            "answerTime": 0,
+//            "gqTypeId": 0,
+//            "gradeId": 0,
+//            "readBookId": 0,
+//            "readTypeId": 0,
+//            "score": 0,
+//            "tpQuestionsList": [
+//                0
+//            ]
+            save () {
+                let params = {
+                    tpQuestionsList: this.idList,
+                    gradeId: this.search.gradeId,
+                    readTypeId: this.search.readTypeId,
+                    readBookId: this.search.readBookId,
+                    answerTime: this.search.answerTime,
+                    score: this.totalScoreAll,
+                    gqTypeId: 2,
+                    amount: this.titleList
+                };
+                answerOption.add(params).then(res => {
+                    if(res.data.code === 0) {
+                        this.dialogVisible = true;
+                        this.$message.success('提交成功');
+
+                    } else {
+                        this.$message.success('生成失败')
+                    }
+                })
+            }
+
+        },
+        mounted() {
+            this.items[0].options = this.global.session.get('gradeList');
+            this.questType()
+        },
+        computed: {
+//            totalScore: function () {
+//                return this.score = this.totalNumber * 5
+//            }
+        }
+    }
+</script>
+<style lang="less">
+    .content {
+       .top{
+           margin-bottom: 20px;
+          .title{
+              margin-top: 10px;display: inline-block;
+          }
+       }
+    .el-table td{
+        border-bottom: none;
+    }
+    }
+
+</style>
+

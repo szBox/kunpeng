@@ -1,0 +1,178 @@
+<template>
+	<div class="answer-options">
+		<!--{{ options }}-->
+		<!--<p> 题目：{{options.name}}</p>
+		<span>答案Id ：{{correct}}</span>
+		<p>
+			选项	ID ：{{qclist}}
+		</p>
+		<p>
+			选项内容 ：{{options.qclist}}
+		</p>-->
+		<!--<div class="input-list" v-for="(item, index) in options" :key="index">
+			<el-input v-model="item.value" class="my-input">
+			    <template slot="prepend">{{optionTitle[index]}}:</template>
+		  	</el-input>
+		  	
+		  	<i class="el-icon-remove" v-if="index > 1" @click="remove(index)"></i>
+		  	<i class="el-icon-circle-plus" v-if="index == options.length - 1" @click="add()"></i>
+		</div>-->
+		<!--<div  class="check-list" >
+			<div v-for="(item, index) in options" :key="index">
+				<el-checkbox v-model="checked">{{optionTitle[index]}}</el-checkbox>
+			</div>
+		</div>-->
+		
+		<el-form class='answer-form' ref="form" :rules="rules"  v-model="options" label-width="80px" style='overflow: hidden;'>
+			<!--<span>{{titleInfo.qclist}}</span>-->
+			<el-form-item label="题目"  prop="titleErr">
+			    <el-input v-model="options.name"></el-input>
+			</el-form-item>
+			<el-form-item label="题目图片" v-if='options.imageUrl'>
+				<MyUpload  v-model='imgUrl' :fileList='timg' :limit='1'></MyUpload>
+				<!--<img class="paper-cover" :src="options.imageUrl" alt="" />-->
+			</el-form-item>
+			
+			<el-form-item :label="optionTitle[index]" prop='optionsErr'  class="input-list" v-for="(item, index) in options.qclist" :key="index">
+				<el-input  v-model="item.value" class="my-input">
+		    	<!--	<template slot="prepend">{{optionTitle[index]}}:</template>-->
+		    		<!--<template slot="prepend">{{item.id}}:</template>-->
+	  			</el-input>	
+			</el-form-item>
+			
+  			<el-form-item  label="正确答案" prop="answerErr">
+			    <el-checkbox-group  v-for="(item, index) in qclist" v-model="correct" class='checkbox-group' :key="item">
+			    	<el-checkbox  :label='item' class='checkbox-check'>{{optionTitle[index]}}</el-checkbox>
+			    </el-checkbox-group>
+		    </el-form-item>
+
+		</el-form>	
+			
+		
+	</div>
+</template>
+
+<script>
+	import MyUpload from '../search-form/upload.vue';
+	export default {
+		name: 'answer-options',
+		props: {
+			value: Array,
+			timg:{
+				type:String,
+				default:''
+			},
+			imgUrl:{
+				type:String,
+				default:''
+			},
+			correct:{
+				type: Array,
+				default () {return []}
+			},
+			qclist:{
+				type: Array,
+				default () {return []}
+			},
+			options: {
+				type: Array,
+				default () {return []}
+			},
+			
+			
+		},
+		data() {
+			return {
+				imgUrl: '',
+				optionTitle: ['A','B','C','D','E','F','G'],
+//				rules: {
+//		            titleErr: [
+//			           { required: true, trigger: 'blur'}
+//		            ],
+//		            optionsErr:[
+//		            	{ required: true, trigger: 'blur'}
+//		            ],
+//		            answerErr:[
+//		            	{type:'array', required: true, trigger: 'change'}
+//		            ]
+//			    },
+			}
+		},
+		 components: {
+            MyUpload
+       },
+		methods: {
+			remove(index) {
+				this.options.splice(index, 1);
+			},
+
+			
+		},
+		watch:{
+	        'options.name' (val){
+	      		this.$emit('EmitAnswer',this.options.name,this.options.qclist,this.correct,this.imgUrl)
+	        },
+	        'correct' (val){
+//	   			console.log(this.correct);
+	         	this.$emit('EmitAnswer',this.options.name,this.options.qclist,this.correct,this.imgUrl)
+	   
+	        },
+	        'options.qclist'(val){
+	      		this.$emit('EmitAnswer',this.options.name,this.options.qclist,this.correct,this.imgUrl)
+	        },
+	        'imgUrl'(val){
+	        	this.$emit('EmitAnswer',this.options.name,this.options.qclist,this.correct,this.imgUrl)
+	        }
+	      
+	   },
+		mounted() {
+			
+			setTimeout(()=>{
+				console.log('prpo',this.options)
+			},1000)
+			
+		}
+	}
+</script>
+
+<style lang="less" scoped>
+	.answer-options{
+		.input-list{
+			margin-bottom: 10px;
+			i{
+				display: inline-block;
+				vertical-align: middle;
+				font-size: 35px;
+				cursor: pointer;
+			}
+			div.el-form-item__content{
+				margin-left: 0 !important;
+			}
+		}
+		.check-list{
+			overflow: hidden;
+			line-height: 50px;
+			span{
+				float: left;
+			}
+			>p{
+				float: left;
+			
+				margin:0 30px 0 0;
+			}
+		}
+		.checkbox-group{
+			float: left;
+			margin-right: 30px;
+			/*.checkbox-check{
+				margin-left: 30px;
+			}*/
+		}
+	
+	}
+	img.paper-cover {
+		max-width: 400px;
+		max-height:200px;	
+		
+	}
+</style>

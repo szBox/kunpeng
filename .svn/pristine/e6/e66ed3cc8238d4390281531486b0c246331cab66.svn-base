@@ -1,0 +1,107 @@
+<template>
+    <div class="view">
+        <div class="title">
+            更新题目类型
+        </div>
+        <SearchForm :items="items" :showMessage="true" :inline="false" labelWidth="120px" :model="search" ref="functionAddForm"></SearchForm>
+    </div>
+</template>
+<script>
+
+    import SearchForm from '@components/search-form/index';
+    import questApi from '@src/network/subject/quest-setting/quest-type';
+    export default{
+        data () {
+            return{
+                search: {
+                    name: this.$route.query.name,
+                    remark: this.$route.query.remark,
+                    id: this.$route.query.id
+                },
+                items:[
+                    {
+                        prop: 'name',
+                        type: 'input',
+                        label: '题目类型名称',
+                        placeholder: '请输入类型名称',
+                        rules: [
+                            {required: true, message: '类型名称不能为空'}
+                        ]
+                    },
+                    {
+                        prop: 'remark',
+                        type: 'textarea',
+                        label: '说明',
+                        placeholder: '请输入说明',
+                        rules: [
+                            {required: true, message: '说明不能为空'}
+                        ],
+                    },
+                    {
+                        type: 'action',
+                        actionList: [
+                            {
+                                text: '提交',
+                                btnType: 'primary',
+                                handleClick: (row) => {
+                                    this.global.formValidate.call(this,'functionAddForm', this.save);
+                                }
+                            },
+                            {
+                                text: '返回',
+                                btnType: 'danger',
+                                handleClick: (row) => {
+                                    this.$router.go(-1);
+                                }
+                            }
+                        ]
+                    }
+                ]
+            }
+        },
+        methods: {
+            save() {
+                let params = {
+                    id: this.search.id,
+                    name: this.search.name,
+                    remark: this.search.remark
+                };
+                questApi.edit(params).then((res) => {
+                    if(res.data.code == 0){
+                        this.$message.success('修改成功');
+                        this.$router.go(-1);
+                    }
+                })
+            },
+            init() {
+                let id = this.$route.params.id;
+                questApi.get(id).then(res => {
+                    if(res.data.code === 0) {
+                      this.search = res.data.data;
+                    }
+                })
+            }
+        },
+        components: {
+            SearchForm
+        },
+        created(){
+            this.init()
+        }
+    }
+</script>
+<style lang="less">
+    .view{
+        background-color: #ffffff;
+        padding: 40px;
+    .title{
+        font-size: 18px;
+        color: #454c5c;
+        padding-left: 5px;
+        font-weight: bold;
+        border-left: 4px solid #2C8DEE;
+        margin-bottom: 20px;
+    }
+    }
+
+</style>

@@ -1,0 +1,234 @@
+<template>
+  <div>
+    <div class="ctrl_btn_box">
+      <el-button v-has="10010201" type="primary" icon="el-icon-plus" @click="$routerGo('student/add')">添加</el-button>
+      <el-button v-has="10010204" icon="el-icon-close " type="danger" plain @click="deletes()">批量取消权限</el-button>
+    </div>
+    <div class="ctrl_form_box">
+      <el-form :inline="true" class="demo-form-inline">
+        <el-form-item label="年级">
+          <el-select v-model="gradeId" label="年级" placeholder="请选择年级" @change="initClass()">
+            <el-option label="所有年级" value="0"></el-option>
+            <el-option
+              v-for="i in gradeList"
+              :key="i.id"
+              :label="i.name"
+              :value="i.id">
+            </el-option>
+          </el-select>
+        </el-form-item>
+        <el-form-item label="班级">
+          <el-select v-model="classId" label="" placeholder="请选择班级">
+            <el-option label="所有班级" value="0"></el-option>
+            <el-option
+              v-for="i in classList"
+              :key="i.id"
+              :label="i.name"
+              :value="i.id">
+            </el-option>
+          </el-select>
+        </el-form-item>
+        <el-form-item label="身份">
+          <el-select v-model="identityId" label="身份" placeholder="请选择身份">
+            <el-option label="所有身份" value="0"></el-option>
+            <el-option
+              v-for="i in identityList"
+              :key="i.id"
+              :label="i.name"
+              :value="i.id">
+            </el-option>
+          </el-select>
+        </el-form-item>
+        <el-form-item label="学生名称">
+          <el-input placeholder="请输入" v-model="name" clearable>学生名称</el-input>
+        </el-form-item>
+        <el-form-item>
+          <el-button type="warning" @click="listPage()">查询</el-button>
+        </el-form-item>
+      </el-form>
+    </div>
+    <div class="table-box">
+      <el-table
+        :data="tableData.records"
+        v-loading="loading"
+        @selection-change="handleSelection">
+        <el-table-column
+          type="selection"
+          width="55"
+        >
+        </el-table-column>
+        <el-table-column
+          type="index"
+          label="序号"
+          width="150">
+        </el-table-column>
+        <el-table-column
+          prop="name"
+          label="学生名称">
+        </el-table-column>
+        <el-table-column
+          prop="className"
+          label="所在班级">
+        </el-table-column>
+        <el-table-column
+          prop="identity"
+          label="身份名称">
+        </el-table-column>
+        <el-table-column
+          prop=""
+          label="操作">
+          <template slot-scope="scope">
+            <el-button v-has="10010203" @click="$routerGo('student/detail/'+scope.row.id)" type="primary" size="mini">查看</el-button>
+            <el-button v-has="10010202" type="warning" size="mini" @click="$routerGo('student/edit/'+scope.row.id)">设置权限</el-button>
+            <el-button v-has="10010204"  type="danger" size="mini" @click="del(scope.row.id)">取消权限</el-button>
+          </template>
+        </el-table-column>
+      </el-table>
+    </div>
+    <div class="block" v-if="tableData.total">
+      <el-button size="mini" @click="handleCurrentChange(1)">首页</el-button>
+      <!--<span class="demonstration">大于 7 页时的效果</span>-->
+      <el-pagination
+        background
+        @current-change="handleCurrentChange"
+        @size-change="handleSizeChange"
+        :current-page="tableData.current"
+        :page-sizes="[20, 50, 100]"
+        :page-size="tableData.size"
+        layout="prev, pager, next"
+        :total="tableData.total">
+      </el-pagination>
+      <el-button size="mini" @click="handleCurrentChange(tableData.pages)">尾页</el-button>
+    </div>
+  </div>
+</template>
+<script>
+  import * as classApi from '@/API/settings/school/class.js';
+  import * as gradeApi from '@/API/settings/school/grade.js';
+  import * as student from '@/API/settings/account/student';
+  import * as identity from '@/API/settings/right/identity';
+  export default {
+    name: 'student_right',
+    data(){
+      return {
+        isAdd: true,
+        gradeId: '0',
+        gradeList: [],
+        classId: '0',
+        classList: [],
+        tableData: {},
+        loading:true,
+        ids: [],
+        name: '',
+        identityId: '0',
+        identityList: []
+      }
+    },
+    created(){
+      this.initGrade();
+      this.initClass();
+      this.initIdentity();
+      this.listPage();
+    },
+    methods: {
+      initGrade(){
+        let vm = this;
+        gradeApi.gradeOptions.r().then(function (res) {
+          let data = res.data;
+          if(data.code == 0){
+            vm.gradeList = data.data;
+          }
+        })
+      },
+      initClass(){
+        let vm = this;
+        let sid = JSON.parse(this.s.getBaseInfo()).sid;
+        let queryStr = 'sid='+sid+'&gid=';
+        if(vm.gradeId !=0){
+          queryStr += vm.gradeId;
+        }
+        classApi.classOptions.r(queryStr).then(function (res) {
+          let data = res.data;
+          if(data.code == 0){
+            vm.classList = data.data;
+          }
+        })
+      },
+      initIdentity(){
+        let vm = this;
+        identity.listAll.r(2).then(function (res) {
+          let data = res.data;
+          if(data.code == 0){
+            vm.identityList = data.data;
+          }
+        })
+      },
+      //分页列表
+      listPage(params){
+        let vm = this;
+        params = this.objExtend({
+          current: 1,
+          size: 20,
+          name: this.name,
+          gradeId: vm.gradeId,
+          classId: vm.classId,
+          identityId: vm.identityId
+        },params);
+        student.listPage.r(params).then(function (res) {
+          let data = res.data;
+          if (data.code == 0) {
+            vm.tableData = data.data;
+            vm.loading = false;
+          }
+        });
+      },
+      //删除框选中事件
+      handleSelection(selection){
+        let vm = this;
+        vm.ids = [];
+        selection.forEach(data=> {
+          vm.ids.push(data.id);
+        })
+      },
+      del(id){
+        let vm = this;
+        vm.$root.eventHub.$off('normalDialogAffirm');
+        vm.$root.eventHub.$emit('normalDialogShow',{content:'确认取消权限？'});
+        vm.$root.eventHub.$on('normalDialogAffirm',function(){
+          let ids = [];
+          ids.push(id);
+          student.cancelRight.r(ids).then(function(res){
+            vm.$message('取消权限成功');
+            vm.listPage();
+          })
+        })
+      },
+      deletes(){
+        if(this.ids.length <= 0) {
+          this.$message.error('请至少选择一项');
+          return;
+        }
+        let vm = this;
+        vm.$root.eventHub.$off('normalDialogAffirm');
+        vm.$root.eventHub.$emit('normalDialogShow',{content:'确认批量取消权限？'});
+        vm.$root.eventHub.$on('normalDialogAffirm',function(){
+          student.cancelRight.r(vm.ids).then(function(res){
+            vm.$message('批量取消权限成功');
+            vm.listPage();
+          })
+        })
+      },
+      //页码改变
+      handleCurrentChange(current) {
+        this.listPage({current:current,size:this.tableData.size});
+      },
+      //显示条数改变
+      handleSizeChange(pageSize){
+        this.listPage({size:pageSize});
+      },
+    }
+  }
+</script>
+<style>
+
+</style>

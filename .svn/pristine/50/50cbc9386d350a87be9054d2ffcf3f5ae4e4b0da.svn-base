@@ -1,0 +1,36 @@
+
+var vue = new Vue();
+const global = {
+    session: {
+        set(key, val) {
+            sessionStorage.setItem(key, JSON.stringify(val));
+        },
+        get(key) {
+            return JSON.parse(sessionStorage.getItem(key)) || {};
+        },
+        clear() {
+            sessionStorage.clear();
+        }
+    },
+    menu: {
+        get(menu) {
+            return global.session.get('user').menus || [];
+        }
+    },
+    //验证提示
+    formValidate (e, target, fun) {
+        let _this = e;
+        _this.$refs[target].$refs['form'].validate((valid) => {
+            if (valid) {
+                fun();
+            } else {
+                return false;
+            }
+        });
+    }
+}
+
+
+
+
+export default global;

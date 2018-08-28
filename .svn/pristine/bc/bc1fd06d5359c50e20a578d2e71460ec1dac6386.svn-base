@@ -1,0 +1,98 @@
+<template>
+  <div class="add-edit-form-box">
+    <el-form label-width="100px" class="demo-ruleForm">
+      <el-form-item label-width="120px" label="权限类型">
+        <template><span v-if="role.type==1">教师</span><span v-else>学生</span></template>
+      </el-form-item>
+      <el-form-item label-width="120px" label="权限模板名称">
+        <template><span>{{role.name}}</span></template>
+      </el-form-item>
+      <el-form-item label-width="120px" label="设置权限">
+        <el-tree
+          :data="allMenus"
+          :default-checked-keys="roleMenus"
+          show-checkbox
+          default-expand-all
+          node-key="id"
+          ref="tree"
+          highlight-current
+          :props="defaultProps">
+        </el-tree>
+      </el-form-item>
+      <el-form-item>
+        <el-button v-has="10010605" type="primary" @click="submitForm()">提交</el-button>
+        <el-button type="primary" @click="$routerGo(-1)">返回</el-button>
+      </el-form-item>
+    </el-form>
+  </div>
+</template>
+<script>
+  import * as role from '@/API/settings/right/role.js';
+  import * as func from '@/API/settings/right/function.js';
+  export default {
+    data() {
+      return {
+        role: {},
+        allMenus: [],
+        roleMenus: [],
+        defaultProps:{
+          children: 'trees',
+          label: 'name'
+        }
+      };
+    },
+    created(){
+      let vm = this, id = this.$route.params.id;
+      vm.initRole(id);
+      vm.initRoleMenus(id);
+    },
+    methods: {
+      initRole(id){
+        let vm = this;
+        role.detail.r(id).then(function(res){
+          if(res.data.code == 0){
+            vm.role = res.data.data;
+          }
+        })
+      },
+      initAllMenus(){
+        let id = this.$route.params.id;
+        let vm = this;
+        func.getSimpleTrees.r().then(function(res){
+          if(res.data.code == 0){
+            vm.allMenus = res.data.data;
+          }
+        })
+      },
+      initRoleMenus(id){
+        let vm = this;
+        role.detailRight.r(id).then(function(res){
+          if(res.data.code == 0){
+            vm.roleMenus = res.data.data;
+            vm.initAllMenus();
+          }
+        })
+      },
+      submitForm() {
+        let vm = this;
+        let checkedIds = vm.$refs.tree.getCheckedKeys();
+        let halfCheckedIds = vm.$refs.tree.getHalfCheckedKeys();
+        let allIds = halfCheckedIds.concat(checkedIds);
+
+        let param = {
+          "id": vm.role.id,
+          "codes": allIds
+        };
+        role.setRight.r(param).then(function(res){
+          if(res.data.code == 0){
+            vm.$message('设置权限成功');
+            vm.$routerGo(-1);
+          }
+        })
+      }
+    }
+  }
+</script>
+<style>
+
+</style>

@@ -1,0 +1,96 @@
+<template>
+    <div class="view">
+        <div class="title">
+            更新答题方式
+        </div>
+        <SearchForm :items="items" :showMessage="true" :inline="false" labelWidth="100px" :model="search" ref="functionAddForm"></SearchForm>
+    </div>
+</template>
+<script>
+
+    import SearchForm from '@components/search-form/index';
+    import answerWay from '@src/network/subject/quest-setting/answerway';
+
+    export default{
+        data () {
+            return{
+                search: {
+                    gradeName: this.$route.query.gradeName,
+                    gptypeName: this.$route.query.gptypeName
+                },
+                items:[
+                    {
+                        prop: 'gradeName',
+                        type: 'input',
+                        label: '答题年级：'
+                    },
+                    {
+                        prop: 'gptypeName',
+                        type: 'input',
+                        label: '答题类型：'
+                    },
+                    {
+                        prop: 'gptypeName',
+                        type: 'input',
+                        label: '答题方式：'
+                    },
+                    {
+                        type: 'action',
+                        actionList: [
+                            {
+                                text: '提交',
+                                btnType: 'danger',
+                                handleClick: (row) => {
+                                    this.global.formValidate.call(this,'functionAddForm', this.save);
+                                }
+                            },
+                            {
+                                text: '返回',
+                                btnType: 'primary',
+                                handleClick: (row) => {
+                                    this.$router.go(-1);
+                                }
+                            }
+                        ]
+                    }
+                ]
+            }
+        },
+        methods: {
+            save() {
+                let params = {
+                    ...this.search
+                };
+                answerWay.edit(params).then((res) => {
+                    if(res.data.code == 0){
+                        this.$message.success('修改成功');
+                        this.$router.go(-1);
+                    }else {
+                        this.$message.success('修改失败');
+                    }
+                })
+            }
+
+        },
+        components: {
+            SearchForm
+        },
+        created(){
+        }
+    }
+</script>
+<style lang="less">
+    .view{
+        background-color: #ffffff;
+        padding: 40px;
+    .title{
+        font-size: 18px;
+        color: #454c5c;
+        padding-left: 5px;
+        font-weight: bold;
+        border-left: 4px solid #2C8DEE;
+        margin-bottom: 20px;
+    }
+    }
+
+</style>

@@ -1,0 +1,216 @@
+<template>
+    <div class="function-add">
+        <SearchForm :items="items" :showMessage="true" :inline="false" labelWidth="120px" :model="search" ref="functionAddForm"></SearchForm>
+        <div class="alertBox">
+            <!--<el-dialog :visible.sync="dialogFormVisible">-->
+                <!--<el-form :model="form" label-width="120px">-->
+                    <!--<el-form-item label="阅读年级：">-->
+                        <!--<el-select v-model="value" placeholder="请选择">-->
+                            <!--<el-option v-for="item in options1" :label="item.label" :value="item.value">-->
+                            <!--</el-option>-->
+                        <!--</el-select>-->
+                    <!--</el-form-item>-->
+                    <!--<el-form-item label="阅读类型：">-->
+                        <!--<el-select placeholder="请选择活动区域" v-model="value">-->
+                            <!--<el-option v-for="item in options2" :value="item.name">-->
+                            <!--</el-option>-->
+                        <!--</el-select>-->
+                    <!--</el-form-item>-->
+                    <!--<el-form-item label="书籍名称：">-->
+                        <!--<el-input style="width: 70%"></el-input>-->
+                        <!--<el-button type="primary">查询</el-button>-->
+                    <!--</el-form-item>-->
+                    <!--<el-form-item label="书籍选择：">-->
+                        <!--<el-checkbox-group v-model="form.type">-->
+                            <!--<el-checkbox></el-checkbox>-->
+                        <!--</el-checkbox-group>-->
+                    <!--</el-form-item>-->
+                <!--</el-form>-->
+                <!--<div slot="footer" class="dialog-footer">-->
+                    <!--<el-button @click="dialogFormVisible = false">取 消</el-button>-->
+                    <!--<el-button type="primary" @click="dialogFormVisible = false">确 定</el-button>-->
+                <!--</div>-->
+            <!--</el-dialog>-->
+        </div>
+    </div>
+</template>
+<script>
+    import SearchForm from '@components/search-form/index';
+
+    import questApi from '@src/network/subject/quest-setting/questions';
+    //  答题类型
+    import answerOption from '@src/network/subject/quest-setting/answer-public.js';
+
+    export default {
+        data() {
+            return {
+                options2: [],
+                dialogFormVisible: true,
+                search: {
+                    answerTypeId: '',
+                    choices: [],
+                    correctChoiceIds: [],
+                    anstname: '',
+                    bookName: '',
+                    id: 0,
+                    name: '',
+                    qyname: '',
+                    imageUrl: '',
+                    insertTime: '',
+                    questionsRankId: 1,
+                    questionsTypeId: '',
+                    readBookId: '2'
+                },
+                form: {
+                    name: ''
+                },
+                items: [
+                    {
+                        prop: 'bookName',
+                        type: 'input',
+                        label: '阅读书籍名称',
+                        placeholder: '请选择书籍名称',
+                        rules: [
+                            {required: true, message: '书籍名称不能为空'}
+                        ],
+                        addition: () => {
+                            return [
+                                <el-button type="warning" on-click={() => this.chooseBook()} style="margin-left: 20px;">打开</el-button>
+                            ]
+                        }
+                    },
+                      {
+                          prop: 'questionsTypeId',
+                          type: 'select',
+                          label: '题目类型',
+                          placeholder: '请选择题目类型',
+                          rules: [
+                              {required: true, message: '题目类型不能为空'}
+                          ],
+                          options: [
+
+                          ],
+                          defaultProps: {
+                              id: 'id',
+                              label: 'name'
+                          }
+                      },
+                    {
+                        label: '题目星级名称',
+                        prop: 'questionsRankId',
+                        renderContent: (h, {row}) => {
+                            return (
+                                <el-rate value={row.questionsRankId} disabled text-color="#ff9900"></el-rate>
+                            )
+                        }
+                    },
+                      {
+                        prop: 'anstname',
+                        type: 'input',
+                        label: '题目'
+                    },
+                    {
+                        prop: 'imageUrl',
+                        type: 'upload',
+                        label: '图片',
+                        limit: 1, //文件最大上传个数
+                        fileList:[]
+                    },
+                    {
+                        prop: 'choices',
+                        placeholder: 'A:',
+                        type: 'input',
+                        label: '选择答案'
+                     },
+                    {
+                        type: 'input',
+                        placeholder: 'B:',
+                    },
+                    {
+                        prop: 'anstname',
+                        type: 'input',
+                        placeholder: 'C:',
+                    },
+                    {
+                        prop: 'anstname',
+                        type: 'input',
+                        placeholder: 'D:',
+                    },
+                    {
+                        prop: 'correctChoiceIds',
+                        type: 'radio',
+                        label: '正确答案',
+                        rules: [
+                            {required: true, message: '位置不能为空'}
+                        ],
+                        options: [
+                            {value: 1, text: 'A'},
+                            {value: 2, text: 'B'},
+                            {value: 3, text: 'C'},
+                            {value: 4, text: 'D'}
+                        ]
+                    },
+                    {
+                        type: 'action',
+                        actionList: [
+                            {
+                                text: '提交',
+                                btnType: 'primary',
+                                handleClick: (row) => {
+                                    this.global.formValidate.call(this,'functionAddForm', this.save);
+                                }
+                            },
+                            {
+                                text: '返回',
+                                btnType: 'primary',
+                                handleClick: (row) => {
+                                    this.$router.go(-1);
+                                }
+                            }
+                        ]
+                    }
+                ],
+                form: {
+                    value: ''
+                }
+            }
+        },
+        methods: {
+            readingType () {
+                let params = {current: 1, size: 10, name: ''}
+                    answerOption.readingType(params).then(res => {
+                    if(res.data.code === 0) {
+                        this.options2 = res.data.data.records
+                    }
+                })
+            },
+            chooseBook () {
+                this.dialogFormVisible = true;
+            },
+            allType() {
+                answerOption.answerType().then(res => {
+                    if(res.data.code === 0) {
+                        this.items[1].options = res.data.data
+                    }
+                })
+            }
+        },
+        created() {
+//            this.initMenu();
+              this.allType();
+              this.readingType()
+        },
+        activated() {
+//            this.initData();
+        },
+        components: {
+            SearchForm
+        }
+    }
+</script>
+<style lang="less" scoped>
+    .function-add{
+        padding: 40px;
+    }
+</style>
+

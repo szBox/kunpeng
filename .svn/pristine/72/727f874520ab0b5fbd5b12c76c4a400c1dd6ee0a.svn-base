@@ -1,0 +1,195 @@
+<template>
+	<div class="home">
+		<!--<my-header></my-header>-->
+		<div class="echartBox">
+			<div class="echart1">
+				<div id="map1" style="width: 100%;height:500px;">
+
+				</div>
+			</div>
+			<div class="echart2">
+				<div id="map2" style="width: 100%;height:500px;">
+
+				</div>
+			</div>
+		</div>
+
+	</div>
+
+</template>
+
+<script>
+	//	import myHeader from './header'
+	//	import echarts from 'echarts';
+	export default {
+		data() {
+			return {
+
+			}
+		},
+		components: {
+			//			myHeader
+		},
+		mounted() {
+			var myChart1 = echarts.init(document.getElementById('map1'));
+			myChart1.setOption({
+				color: ['#F87D51', '#2C8CF0'],
+				
+				title: {
+					text: '完成率',
+					padding:[10,20],
+					textStyle: {
+						//文字颜色
+						color: '#318EEF',
+						//字体风格,'normal','italic','oblique'
+						fontStyle: 'normal',
+						//字体系列
+						fontFamily: 'sans-serif',
+						//字体大小
+						fontSize: 14,
+					}
+				},
+				tooltip: {
+					trigger: 'axis',
+					axisPointer: {
+						type: 'shadow'
+					},
+					//					formatter: function(value){
+					//						var res='';
+					//		               console.log(value)
+					//		                for(var i=0; i<value.length; i++){
+					//		                	res+=value[i].seriesName+'：'+value[i].data+'%</br>'
+					//		                }
+					//            			return '完成率'+'<br>'+ res
+					//         			}
+
+				},
+				legend: {
+					data: ['必读书籍完成率', '选读书籍完成率'],
+					right: 0,
+					orient: 'vertical',
+					
+				},
+				calculable: true,
+				xAxis: [{
+					offset: 15,
+					type: 'category',
+					splitLine: {
+						show: false, //去掉横线
+
+					},
+					axisTick: {
+						show: false
+					},
+					axisLine: {
+						lineStyle: {
+							//去掉X线条
+							color: '#555',
+							width: 0, //这里是为了突出显示加上的
+						}
+					},
+					data: ['一年级', '二年级', '三年级', '四年级', '五年级', '六年级']
+				}],
+				yAxis: [{
+					type: 'value',
+					splitLine: {
+						show: true, //去掉横线
+					},
+					axisLabel: {
+						formatter: '{value} %'
+					},
+					max: 100,
+					splitNumber: 5,
+					axisTick: {
+						show: false //去掉坐标刻度
+					},
+					axisLine: {
+						lineStyle: {
+							//去掉Y线条
+							color: '#555',
+							width: 0, //这里是为了突出显示加上的
+						}
+					},
+
+				}],
+				series: [
+
+					{
+						name: '必读书籍完成率',
+						type: 'bar',
+						barGap: 0,
+						barWidth: 20, //柱图宽度
+						data: [50, 70, 90, 40, 85, 95],
+						itemStyle: {
+							normal: {
+								barBorderRadius: [10, 10, 0, 0],
+								label: {
+									show: true,
+									position: 'top',
+									textStyle: {
+										color: '#667280',
+										fontSize: '10'
+									},
+									formatter: function(value) {
+										return value.data + '%'
+									}
+
+								}
+
+							}
+						},
+
+					},
+					{
+						name: '选读书籍完成率',
+						type: 'bar',
+						barWidth: 20, //柱图宽度
+						data: [30, 50, 50, 60, 70, 80],
+						itemStyle: {
+							normal: {
+								barBorderRadius: [10, 10, 0, 0],
+								label: {
+									show: true,
+									position: 'top',
+									textStyle: {
+										color: '#667280',
+										fontSize: '10'
+									},
+									formatter: function(value) {
+										return value.data + '%'
+									}
+
+								}
+
+							}
+
+						},
+
+					},
+				],
+
+			})
+		},
+	}
+</script>
+
+<style lang="less" scoped>
+	.home {
+		background: #EEF3F9;
+		margin-left: 300px;
+	}
+	
+	.echartBox {
+		overflow: hidden;
+		background: #fff;
+		.echart1 {
+			float: left;
+			width: 700px;
+			padding-top: 100px;
+		}
+		.echart2 {
+			float: right;
+			width: 500px;
+		}
+	}
+</style>

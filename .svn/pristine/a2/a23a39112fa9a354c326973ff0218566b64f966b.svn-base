@@ -1,0 +1,82 @@
+<template>
+  <div class="add-edit-form-box">
+    <el-form :model="paramForm" :rules="rules" ref="paramForm" label-width="100px" class="demo-ruleForm">
+      <el-form-item label-width="120px" label="权限模板名称" prop="name">
+        <el-input v-model="paramForm.name"></el-input>
+      </el-form-item>
+      <el-form-item label-width="120px" label="权限模板类型" prop="type">
+        <el-radio-group v-model="paramForm.type">
+          <el-radio :label="1">教师</el-radio>
+          <el-radio :label="2">学生</el-radio>
+        </el-radio-group>
+      </el-form-item>
+      <el-form-item label-width="120px" label="描述" prop="remark">
+        <el-input v-model="paramForm.remark"></el-input>
+      </el-form-item>
+      <el-form-item>
+        <el-button v-has="10010602" type="primary" @click="submitForm('paramForm')">提交</el-button>
+        <el-button type="primary" @click="$routerGo(-1)">返回</el-button>
+      </el-form-item>
+    </el-form>
+  </div>
+</template>
+<script>
+  import * as role from '@/API/settings/right/role.js';
+  export default {
+    data() {
+      return {
+        paramForm: {},
+        rules: {
+          name: [
+            { required: true, message: '请输入权限模板名称', trigger: 'blur' },
+            { min: 1, max: 40, message: '长度在 1 到 40 个字符', trigger: 'blur' }
+          ],
+          type: [
+            { required: true, message: '权限模板类型', trigger: 'blur' }
+          ],
+          remark: [
+            { max: 40, message: '描述不超过40个字符', trigger: 'blur' }
+          ]
+        }
+      };
+    },
+    created(){
+      let vm = this, id = this.$route.params.id;
+      this.initRole(id);
+    },
+    methods: {
+      initRole(id){
+        let vm = this;
+        role.detail.r(id).then(function(res){
+          if(res.data.code == 0){
+            vm.paramForm = res.data.data;
+          }
+        })
+      },
+      submitForm(formName) {
+        let vm = this, pa = vm.paramForm, bl = false;
+        this.$refs[formName].validate((valid) => {
+          bl = valid;
+        });
+        if(!bl){
+          return false;
+        }
+        let param = {
+          "id": pa.id,
+          "name": pa.name,
+          "type": pa.type,
+          "remark": pa.remark
+        };
+        role.edit.r(param).then(function(res){
+          if(res.data.code == 0){
+            vm.$message('更新成功');
+            vm.$routerGo(-1);
+          }
+        })
+      }
+    }
+  }
+</script>
+<style>
+
+</style>

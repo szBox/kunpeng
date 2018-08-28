@@ -1,0 +1,76 @@
+<template>
+  <div class="add-edit-form-box">
+    <el-form ref="form" :model="form" :rules="rules" label-width="80px">
+      <el-form-item label="年级名称" prop="name">
+        <el-input v-model="form.name" style="width: 200px;" maxlength="50"></el-input>
+      </el-form-item>
+      <el-form-item>
+        <el-button type="primary" @click="formValid('form',onSubmit)">
+                    <span v-if="form.id ==null">
+                        新增
+                    </span>
+          <span v-if="form.id !=null">
+                        编辑
+                    </span>
+        </el-button>
+        <el-button @click="$routerGo(-1)">取消</el-button>
+      </el-form-item>
+    </el-form>
+  </div>
+</template>
+<script>
+
+  import * as grade from  '@/API/settings/school/grade';
+
+  export default {
+    name: 'grade_edit',
+    data(){
+      return {
+        form: {
+          id: null,
+          name: ''
+        },
+        rules: {
+          name: this.formRules({required: true})
+        }
+      }
+    },
+    created(){
+      let vm = this;
+      vm.form.id = this.$route.query.id;
+      if (vm.form.id) {
+        grade.queryById.r(vm.form.id).then(function (res) {
+          let data = res.data;
+          if (data.code == 0) {
+            vm.form = data.data;
+          }
+        });
+      }
+    },
+    methods: {
+      onSubmit(form){
+        let vm = this;
+        if (!this.form.id) {
+          grade.saveGrade.r(this.form).then(function (res) {
+            let data = res.data;
+            if (data.code == 0) {
+              vm.$message('新增成功');
+              vm.$routerGo(-1);
+            }
+          });
+        } else {
+          grade.editGrade.r(this.form).then(function (res) {
+            let data = res.data;
+            if (data.code == 0) {
+              vm.$message('修改成功');
+              vm.$routerGo(-1);
+            }
+          });
+        }
+      }
+    }
+  }
+</script>
+<style>
+
+</style>

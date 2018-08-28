@@ -1,0 +1,105 @@
+
+<template>
+    <div class="function-add">
+        <SearchForm :items="items" :showMessage="true" :inline="false" labelWidth="100px" :model="search" ref="functionAddForm"></SearchForm>
+    </div>
+</template>
+<script>
+    import SearchForm from '@components/search-form/index';
+    import answerType from '@src/network/subject/quest-setting/answer-public.js';
+
+    import answerWay from '@src/network/subject/quest-setting/answerway'
+    export default {
+        data() {
+            return {
+                search: {
+                    gqtypeId: '',
+                    gradeId: ''
+                },
+                items: [
+                    {
+                        prop: 'gradeId',
+                        type: 'select',
+                        label: '年级:',
+                        placeholder: '请选择',
+                        options: [
+                            {required: true, message: '年级不能为空'}
+                        ],
+                        defaultProps: {
+                            id: 'id',
+                            label: 'name'
+                        }
+                    },
+                    {
+                        prop: 'gqtypeId',
+                        type: 'select',
+                        label: '答题方式:',
+                        placeholder: '请选择',
+                        options: [
+                            {required: true, message: '答题方式不能为空'}
+                        ],
+                        defaultProps: {
+                            id: 'id',
+                            label: 'name'
+                        }
+                    },
+                    {
+                        type: 'action',
+                        actionList: [
+                            {
+                                text: '提交',
+                                btnType: 'primary',
+                                handleClick: (row) => {
+                                    this.global.formValidate.call(this,'functionAddForm', this.save);
+                                }
+                            },
+                            {
+                                text: '返回',
+                                btnType: 'primary',
+                                handleClick: (row) => {
+                                    this.$router.go(-1);
+                                }
+                            }
+                        ]
+                    }
+                ]
+            }
+        },
+        methods: {
+            // 添加
+            save() {
+                let params = {
+                    ...this.search
+                };
+                answerWay.add(params).then((res) => {
+                    if(res.data.code == 0){
+                        this.$message.success('添加成功');
+                        this.$router.go(-1);
+                    }else{
+                        this.$message.success('添加失败，请重新添加');
+                    }
+                })
+            },
+            answerType() {
+                answerType.answerList().then(res => {
+                    if(res.data.code == 0){
+                        this.items[1].options = res.data.data
+                    }
+                })
+            }
+        },
+        mounted(){
+            this.items[0].options = this.global.session.get('gradeList');
+            this.answerType()
+        },
+        components: {
+            SearchForm
+        }
+    }
+</script>
+<style lang="less" scoped>
+    .function-add{
+        padding: 40px;
+    }
+</style>
+

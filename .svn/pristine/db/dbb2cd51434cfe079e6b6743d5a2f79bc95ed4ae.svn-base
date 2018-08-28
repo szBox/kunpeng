@@ -1,0 +1,160 @@
+<template>
+    <div class="function-add">
+        <SearchForm :items="items" :showMessage="true" :inline="false" labelWidth="120px" :model="search" ref="functionAddForm"></SearchForm>
+    </div>
+</template>
+<script>
+    import SearchForm from '@components/search-form/index';
+    import questApi from '@src/network/subject/quest-setting/questStar';
+    export default {
+        data() {
+            return {
+                search: {
+                    parentId: 1,
+                    name: '',
+                    type: 1,
+                    url: '',
+                    iconUrl: '',
+                    sortNo: 1
+                },
+                items: [
+                    {
+                        prop: 'parentId',
+                        type: 'input',
+                        label: '阅读书籍名称',
+                        placeholder: '请选择上级菜单',
+                        rules: [
+                            {required: true, message: '上级菜单不能为空'}
+                        ],
+                        addition: () => {
+                            return [
+                                <el-button type="primary" style="margin-left: 20px;" on-click={this.chooseBook}>选择书籍</el-button>
+                            ]
+                        }
+                    },
+                    {
+                        prop: 'name',
+                        type: 'input',
+                        label: '功能名称',
+                        rules: [
+                            {required: true, message: '功能名称不能为空'}
+                        ]
+                    },
+                    {
+                        prop: 'url',
+                        type: 'input',
+                        label: '菜单URL'
+                    },
+                    {
+                        prop: 'iconUrl',
+                        type: 'upload',
+                        label: '图片',
+                        limit: 1, //文件最大上传个数
+                        fileList:[]
+                    },
+                    {
+                        prop: 'type',
+                        type: 'radio',
+                        label: '菜单类型',
+                        rules: [
+                            {required: true, message: '位置不能为空'}
+                        ],
+                        options: [
+                            {value: 1, text: '菜单目录'},
+                            {value: 2, text: '菜单功能'},
+                            {value: 3, text: '操作功能'}
+                        ]
+                    },
+                    {
+                        prop: 'sortNo',
+                        type: 'input',
+                        label: '排序NO'
+                    },
+                    {
+                        type: 'action',
+                        actionList: [
+                            {
+                                text: '提交',
+                                btnType: 'primary',
+                                handleClick: (row) => {
+                                    this.global.formValidate.call(this,'functionAddForm', this.save);
+                                }
+                            },
+                            {
+                                text: '返回',
+                                btnType: 'primary',
+                                handleClick: (row) => {
+                                    this.$router.go(-1);
+                                }
+                            }
+                        ]
+                    }
+                ]
+            }
+        },
+        methods: {
+            chooseBook() {
+                
+            },
+            initMenu() {
+                funcApi.getMenus().then(res => {
+                    if(res.data.code === 0) {
+                        this.items[0].options = this.items[0].options.concat(res.data.data);
+                    }
+                });
+            },
+            initData() {
+                let id = this.$route.params.id;
+                let obj = this.$route.params.obj;
+                if(id) {
+                    this.search = {
+                        parentId: +id,
+                        name: '',
+                        type: 1,
+                        url: '',
+                        iconUrl: '',
+                        sortNo: 1
+                    }
+                }
+                if(obj) this.search = { ...obj };
+            },
+            save() {
+                let params = {
+                    ...this.search
+                };
+                let obj = this.$route.params.obj;
+                if(obj) {
+                    funcApi.edit(params).then((res) => {
+                        if(res.data.code == 0){
+                            this.$message.success('修改成功');
+                            this.$router.go(-1);
+                        }
+                    })
+                }else{
+                    funcApi.add(params).then((res) => {
+                        if(res.data.code == 0){
+                            this.$message.success('添加成功');
+                            this.$router.go(-1);
+                        }
+                    })
+                }
+            }
+        },
+        created() {
+            this.initMenu();
+        },
+        activated() {
+            this.initData();
+        },
+        components: {
+            SearchForm
+        }
+    }
+</script>
+<style lang="less" scoped>
+    .function-add{
+        padding: 40px;
+        background-color: #ffffff;
+    }
+</style>
+

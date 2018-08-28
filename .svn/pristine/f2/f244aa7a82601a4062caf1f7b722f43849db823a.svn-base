@@ -1,0 +1,90 @@
+import network from '../../index';
+
+export default {
+//权限模板
+	async allMenu () {
+        const res = await network.get({
+            url: 'right/tree/simple',
+        });
+        return res;
+    },
+/*****************权限管理*******************/  
+//老师权限管理 type:1,  学生权限管理 type:2
+	async tableAuthorityT (params) {
+        const res = await network.post({
+            url: 'teacher/list/page',
+            data: params
+        });
+        return res;
+    },
+// 树 树 树    老师
+    async listTreeT (params) {
+        const res = await network.post({
+            url: 'teacher/list/tree',
+            data: params
+        });
+        return res;
+    },
+
+//查看
+	async AuthoritySee (id) {
+        const res = await network.get({
+            url: 'identity/detail/'+id,
+        });
+        return res;
+    },
+//添加
+	async AuthorityAdd (params) {
+        const res = await network.post({
+            url: 'identity/add',
+            data: params
+        });
+        return res;
+    },
+//更新
+	async AuthorityEdit (params) {
+        const res = await network.put({
+            url: 'identity/edit',
+            data: params
+        });
+        return res;
+    },
+//删除
+	async AuthorityDelete (id) {
+        const res = await network.delete({
+            url: 'identity/delete/'+id,
+        });
+        return res;
+    },
+//删除  批量
+	async AuthorityDeleteS (params) {
+        const res = await network.delete({
+            url: 'identity/delete/ids',
+            data: params
+        });
+        return res;
+   },
+
+
+
+
+//部门   老师  下拉列表
+	async depSelect (params) {
+        const res = await network.get({
+            url: 'department/options',
+            data: params
+        });
+        return res;
+   	}, 
+   
+//身份 下拉列表    老师1  学生2
+	async IdentitySelect (type) {
+        const res = await network.get({
+            url: 'identity/list/all',
+            data: type
+        });
+        return res;
+   }, 
+}
+
+

@@ -1,0 +1,69 @@
+h3{
+    color: red;
+    display: flex;
+    font-size: 18px;
+    margin: 10px;
+}
+
+.doc, a{
+    color: red;
+    margin: 10px;
+}
+
+.time{
+    margin: 10px;
+    span:last-child {
+        color: blue;
+        cursor: pointer;
+        padding-left: 10px;
+    }
+}
+
+// switch
+.el-switch{
+    margin-right: 10px;
+}
+ul,li{
+    list-style: none;
+}
+
+
+//弹窗
+.el-dialog__body{
+    overflow: hidden;
+}
+//试卷  修改题目
+.answer-form .el-form-item__label:before {
+    content: '*';
+    color: #f56c6c;
+    margin-right: 4px;
+}
+
+// 黄色  查询按钮
+.el-button--warning,.el-button--warning:active,.el-button--warning:focus{
+    background-color: #FF9900;
+    border-color: #FF9900;
+}
+
+ .el-button--warning:hover {
+    background: #FFAD33;
+    border-color: #FFAD33;
+    color: #fff;
+}
+.el-Edit{
+    border:1px solid #409EFF;
+    color:#409EFF
+}
+
+.button-box{
+    .btn-add{
+        float: left;
+    }
+    .btn-delete,.btn-daoru,.btn-updata{
+        float:right
+    }
+    .btn-daoru{
+        border: 1px solid #409EFF;
+        color: #409EFF;
+    }
+}

@@ -1,0 +1,127 @@
+<template>
+    <div class="view">
+        <div class="title">
+            更新答题方式
+        </div>
+        <SearchForm :items="items" :showMessage="true" :inline="false" labelWidth="100px" :model="search" ref="functionAddForm"></SearchForm>
+    </div>
+</template>
+<script>
+
+    import SearchForm from '@components/search-form/index';
+
+    import answerWay from '@src/network/subject/quest-setting/answerway';
+    import answerType from '@src/network/subject/quest-setting/answer-public.js';
+
+    export default{
+        data () {
+            return{
+                search: {
+                    id:'',
+                    gradeId: '',
+                    gptypeId: ''
+                },
+                items:[
+                    {
+                        prop: 'gradeId',
+                        type: 'select',
+                        label: '年级:',
+                        placeholder: '请选择',
+                        options: [
+                        ],
+                        defaultProps: {
+                            id: 'id',
+                            label: 'name'
+                        }
+                    },
+                    {
+                        prop: 'gptypeId',
+                        type: 'select',
+                        label: '答题方式:',
+                        placeholder: '请选择',
+                        options: [
+                        ],
+                        defaultProps: {
+                            id: 'id',
+                            label: 'name'
+                        }
+                    },
+                    {
+                        type: 'action',
+                        actionList: [
+                            {
+                                text: '提交',
+                                btnType: 'danger',
+                                handleClick: (row) => {
+                                    this.global.formValidate.call(this,'functionAddForm', this.save)
+                                }
+                            },
+                            {
+                                text: '返回',
+                                btnType: 'primary',
+                                handleClick: (row) => {
+                                    this.$router.go(-1);
+                                }
+                            }
+                        ]
+                    }
+                ]
+            }
+        },
+        methods: {
+            answerType() {
+                answerType.answerList().then(res => {
+                    if(res.data.code == 0){
+                        this.items[1].options = res.data.data
+                    }
+                })
+            },
+            save() {
+                let params = {
+                    id: this.search.id,
+                    gradeId: this.search.gradeId,
+                    gptypeName: this.search.gptypeName
+                };
+                answerWay.edit(params).then((res) => {
+                    if(res.data.code == 0){
+                    this.$message.success('修改成功');
+                    this.$router.go(-1);
+                    }
+                })
+            },
+            init() {
+                let id = this.$route.params.id;
+                answerWay.get(id).then(res => {
+                    if(res.data.code === 0) {
+                        this.search = res.data.data;
+                        this.search.gradeId = res.data.data.gradeName
+                    }
+                })
+            }
+
+        },
+        components: {
+            SearchForm
+        },
+        created(){
+            this.init();
+            this.answerType();
+            this.items[0].options = this.global.session.get('gradeList')
+        }
+    }
+</script>
+<style lang="less">
+    .view{
+        background-color: #ffffff;
+        padding: 40px;
+    .title{
+        font-size: 18px;
+        color: #454c5c;
+        padding-left: 5px;
+        font-weight: bold;
+        border-left: 4px solid #2C8DEE;
+        margin-bottom: 20px;
+    }
+    }
+
+</style>

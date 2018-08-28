@@ -1,0 +1,282 @@
+<template>
+	<div>
+		<SearchForm :items="items" :showMessage="true" :inline="true" labelWidth="" :model="search"></SearchForm>
+		<div class="button-box">
+            <el-button @click='goAdd()' type='primary' icon="el-icon-plus" class='btn-add' style='margin-bottom: 15px;'>添加</el-button>
+           
+            <el-button @click="delectList()" type="danger" plain icon="el-icon-close" class="btn-delete" >批量删除</el-button>
+        </div>
+		<el-switch
+		  v-model="switchVal"
+		  on-value="1" off-value="0"
+		  active-color='#409EFF'
+		  inactive-color='#f00'
+		  active-value='开'
+		  @change='switchFn'
+		>
+
+		</el-switch>
+		<DataTable :loading="loading" :columns="columns" :data="data" :total="total" :page-size="search.size" @page-change="pageChange"></DataTable>
+	
+		
+	
+	</div>
+
+</template>
+
+<script>
+	import DataTable from '@components/data-table/index';
+	import SearchForm from '@components/search-form/index';
+	import home from '@src/network/home/home.js';
+	import paper from '@src/network/subject/quest-setting/paper.js'
+	export default {
+		data() {
+			return {
+				search: {
+				
+					gqTypeId: '',
+					gradeId: '',
+					name: "",
+					readBookId: '',
+					readTypeId: '',
+					sid: this.global.session.get('user').sid,
+					status: "",
+					current: 1,
+					size: 10,
+					stuId:'',
+					
+				},
+				types:{
+					gradeId:'',
+					typeId:'',
+					name: "",
+					sid: this.global.session.get('user').sid,
+					current: 1,
+					size:9999
+				},
+				books:{
+					gradeId:'',
+					typeId:'',
+					name: "",
+					sid: this.global.session.get('user').sid,
+					current: 1,
+					size:9999,
+					readTypeId: '',
+					stuId: ''
+				},
+
+				
+				items: [
+                    {
+                        prop: 'gradeId',
+                        type: 'select',
+                        label: '年级',
+                        value:'',
+//                      rules: [
+//                          {required: true, message: '位置不能为空'}
+//                      ],
+                        options: [
+                        ],
+                        defaultProps: {
+                        	id: 'id',
+                        	label: 'name'
+                        },
+                        hasAll: true,
+                        change: (val) => {
+                            this.bookSelect(val);
+                        }
+                    },
+                    {
+                        prop: 'readTypeId',
+                        type: 'select',
+                        label: '阅读类型',
+                        options: [  
+                        ],
+                        defaultProps: {
+                        	id: 'id',
+                        	label: 'name'
+                        },
+                        hasAll: true
+                    },
+                    
+                    {
+                        prop: 'readBookId',
+                        type: 'select',
+                        label: '书籍名称',
+                        options: [  
+                        ],
+                        defaultProps: {
+                        	id: 'id',
+                        	label: 'name'
+                        },
+                        hasAll: true
+                    },
+                   
+                    {
+                        type: 'action',
+                        actionList: [
+                            {
+                                text: '查询',
+                                btnType: 'warning',
+                                handleClick: () => {
+									this.paperList()
+//                                  this.formValidate('locationAddForm', this.save);
+                                }
+                            },
+                            
+                        ]
+                    }
+                ],
+				columns: [
+					{
+						//  全选模块
+                        type: 'selection'	
+					},
+					{
+						label: '试卷ID',
+						prop: 'id',
+//						renderContent: (h, { row, $index }) => {
+//							return (+$index+1)+(this.search.current)*(this.search.size);
+//						}
+					},
+					{
+						label: '试卷名称',
+						prop: 'name'
+					},
+					{
+						label: '阅读年级',
+						prop: 'gradeName'
+					},
+					
+					{
+						label: '阅读书籍名称',
+						prop: 'readBookName'
+					},
+					{
+						label: '组题方式',
+						prop: 'gqTypeName'
+					},
+					{
+						label: '试题使用状态',
+						prop: 'status',
+						renderContent: (h, { row }) => {
+					        if(row.status==0){
+					        	return <span style='color:red'>未使用</span>
+					        	
+					        }else {
+					        	return <span>正常使用</span>
+
+					        }
+                        }
+					},
+					{
+						label: '添加时间',
+						prop: 'insertTime',
+						renderContent: (h, { row }) => {
+					         return this.global.dateFilter.ymdHm(row.insertTime)					        
+                        }
+					},
+					{
+						label: '操作',
+						type: 'action',
+						width:'260px',
+						renderContent: (h, { row }) => {
+							return [
+								 <el-switch
+						          v-model="row.status"
+						          on-color="#00A854"
+						          on-text="开"
+						          on-value="1"
+						          off-color="#F04134"
+						          off-text="关"
+						          off-value="0"
+						          on-change={()=>this.changeSwitch(row.status)}>
+						        </el-switch>,
+								<el-button type='primary' on-click={() => this.$router.push({ name: 'paperSee', params: { init: row}})}  size='mini'>查看</el-button>,
+								<el-button type='' on-click={() => this.$router.push({ name: 'paperEdit', params: { init: row }})} style='border:1px solid #409EFF; color:#409EFF' size='mini' >更新</el-button>,
+								<el-button type='' on-click={() => this.global.deleteConfirm.call(this, this.delect, row.id)} style='border:1px solid #F46C6C; color:#F46C6C' size='mini' >删除</el-button>,
+							]
+                        }
+					},
+				],
+				
+				value2:true,
+				switchVal:'',
+				data: [],
+				total: 0,
+				loading: true
+			}
+		},
+		methods: {
+			pageChange (index) {
+				this.search.current = index;
+				this.paperList();
+			},
+		
+			paperList () {
+				let params=this.search;
+				paper.paper(params).then(res => {
+                    console.log('试卷',res)  //接受到的参数
+					if(res.data.code === 0) {
+						
+						this.loading = false;
+						this.data = res.data.data.records;
+                        this.total =  res.data.data.total;
+                    }
+                    
+                })
+           },
+           typeSelect(){
+           		paper.readSel(this.types).then(res => {
+                    console.log('类型下拉',res)  //接受到的参数
+					if(res.data.code === 0) {
+						this.items[1].options = res.data.data.records;
+                    }
+                    
+                })
+           },
+           bookSelect (){
+           		paper.bookSel(this.books).then(res => {
+                    console.log('书籍下拉',res)  //接受到的参数
+					if(res.data.code === 0) {
+						this.items[2].options = res.data.data;
+                    }
+                    
+                })
+           },
+           changeSwitch (data){
+		       		
+		      console.log(data)
+		    
+           },
+           goAdd (){
+           		this.$router.push({
+					name: 'paperAdd'
+				})
+           }
+		},
+		mounted() {
+			this.items[0].options = this.global.session.get('gradeList')
+			this.paperList();
+			this.typeSelect();
+			this.bookSelect();
+		},
+		components: {
+			DataTable,
+			SearchForm
+		}
+	}
+</script>
+
+<style lang="less" scoped>
+	.button-box{
+    	.btn-add{
+    		float: left;
+    	}
+    	.btn-delete{
+    		float:right
+    	}
+    }
+	
+</style>
+

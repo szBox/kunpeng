@@ -1,0 +1,142 @@
+<template>
+	<div>
+		<SearchForm :items="items" :showMessage="true" :inline="true" labelWidth="" :model="search" ref="locationAddForm"></SearchForm>
+		<DataTable :loading="loading" :columns="columns" :data="data"></DataTable>
+	</div>
+
+</template>
+
+<script>
+	import DataTable from '@components/data-table/index';
+	import SearchForm from '@components/search-form/index';
+	import allList from '@src/network/statistics/allList.js'
+	export default {
+		data() {
+			return {
+				search: {
+					current: 1,
+					size: 20
+				},
+				items: [
+                    {
+                        prop: 'location',
+                        type: 'select',
+                        label: '年级',
+                        value:'',
+//                      rules: [
+//                          {required: true, message: '位置不能为空'}
+//                      ],
+                        options: [
+                            {value: 1, text: 'aaa'},
+                            
+                        ]
+                    },
+                    {
+                        prop: 'location',
+                        type: 'select',
+                        label: '班级',
+                        options: [
+                            {value: 1, text: '一年级'},
+                            {value: 2, text: '二年级'},
+                        ]
+                    },
+                    {
+                        prop: 'location',
+                        type: 'input',
+                        label: '学生姓名',
+                    },
+                    {
+                        prop: 'location',
+                        type: 'input',
+                        label: '学号',
+                    },
+                    {
+                        type: 'action',
+                        actionList: [
+                            {
+                                text: '查询',
+                                btnType: 'warning',
+                                handleClick: (row) => {
+                                    this.formValidate('locationAddForm', this.save);
+                                }
+                            },
+                            
+                        ]
+                    }
+                ],
+				columns: [{
+						label: '学生姓名',
+						prop: 'name'
+					},
+					{
+						label: '学号',
+						prop: 'sid'
+					},
+					{
+						label: '所在班级',
+						prop: 'class'
+					},
+					{
+						label: '负责老师',
+						prop: '张老师'
+					},
+					{
+						label: '年级',
+						prop: 'grade'
+					},
+					{
+						label: '必读书籍完成数',
+						prop: 'Anum'
+					},
+					{
+						label: '选读书籍完成数',
+						prop: 'Bnum'
+					},
+					{
+						label: '理解',
+						prop: 'yes'
+					},
+					{
+						label: '当前书籍答题次数',
+						prop: 'nowNum'
+					},
+				],
+				data: [],
+				total: 0,
+				loading: false
+			}
+		},
+		methods: {
+			getList() {
+//              this.loading = true;
+//              funcApi.list().then(res => {
+//                  if(res.data.code === 0) {
+//                      this.loading = false;
+//                      this.data = res.data.data;
+//                      this.total = this.data.length;
+//                  }
+//              })
+				jiluList.jiluList(
+					{
+						bookId: 0,
+						current: this.search.current,
+						gradeId: 0,
+						size:this.search.size
+					}).then(res => {
+                    console.log('答题记录',res)  //接受到的参数
+					if(res.data.code === 0) {
+						
+                    }
+                    
+                })
+            }
+		},
+		mounted() {
+			this.getList()
+		},
+		components: {
+			DataTable,
+			SearchForm
+		}
+	}
+</script>

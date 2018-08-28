@@ -1,0 +1,105 @@
+<template>
+    <div id="app" class="app">
+        <el-container class="container">
+            <el-header class="header">
+                <div class="logo">dsds</div>
+                <el-menu
+                    :default-active="active"
+                    class="el-menu"
+                    mode="horizontal"
+                    @select="menuSelect"
+                    background-color="#2C8CF0"
+                    text-color="#fff"
+                    active-text-color="#fff">
+                    <el-menu-item :index="index" v-for="(item, index) in menu" :key="index">{{item.name}}</el-menu-item>
+                </el-menu>
+                <div class="user">admin</div> 
+            </el-header>
+            <el-container class="content">
+                <el-aside width="300px">
+                    <el-menu
+                        :router="true"
+                        :unique-opened="true"
+                        default-active="0"
+                        class="el-menu-vertical">
+                        <el-submenu :index="index" v-for="(item, index) in subMenu" :key="index">
+                            <template slot="title">
+                                <i class="el-icon-menu"></i>
+                                <span>{{item.name}}</span>
+                            </template>
+                            <el-menu-item-group v-if="item.trees">
+                                <el-menu-item :index="subItem.id" @click.native="toPath(item, subItem)" v-for="(subItem, subIndex) in item.trees" :key="subIndex">{{subItem.name}}</el-menu-item>
+                            </el-menu-item-group>
+                        </el-submenu>
+                    </el-menu>
+                </el-aside>
+                <el-main>
+                    <keep-alive>
+                        <router-view></router-view>
+                    </keep-alive>
+                </el-main>
+            </el-container>
+        </el-container>
+    </div>
+</template>
+
+<script>
+    import './index.less';
+    export default{
+        data() {
+            return {
+                active: 0,
+                menu: this.global.menu.get(),
+                subMenu: [],
+                rootPath: ''
+            }
+        },
+        methods: {
+            menuSelect(index) {
+                this.active = index;
+                this.subMenu = this.menu[index].trees || [];
+                this.rootPath = this.menu[index].url;
+                console.log(this.rootPath)
+                this.$router.push(this.menu[index].url);
+            },
+            toPath(item, subItem) {
+                let lastPath = '';
+                lastPath = this.rootPath + item.url + subItem.url;
+                console.log(lastPath)
+                this.$router.push(lastPath);
+                // console.log(item);
+                // console.log(subItem)
+            }
+        },
+        mounted() {
+            this.subMenu = this.menu[this.active].trees || [];
+            this.rootPath = this.menu[this.active].url;
+        }
+    };
+</script>
+<style lang="less">
+    .app{
+        .container{
+            .content{
+                height: calc(100vh - 60px);
+            }
+            .header{
+                background: #2C8CF0;
+                display: flex;
+                padding: 0;
+                >div{
+                    height: 100%;
+                    line-height: 60px;
+                    width: 300px;
+                }
+                .el-menu{
+                    flex: 1;
+                }
+                .logo{
+                    width: 300px;
+                }
+            }
+        }
+    }
+</style>
+

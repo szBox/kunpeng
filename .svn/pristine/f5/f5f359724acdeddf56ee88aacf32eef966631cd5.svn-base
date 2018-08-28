@@ -1,0 +1,34 @@
+
+const RightFunction = () => import(/* webpackChunkName: "setting" */ '@src/general/app/setting/right/function/index.vue');
+const RightFunctionAdd = () => import(/* webpackChunkName: "setting" */ '@src/general/app/setting/right/function/add.vue');
+const Student = () => import(/* webpackChunkName: "setting" */ '@src/general/app/setting/right/student/index.vue');
+export default [
+    {
+        path: 'function',
+        name: 'function',
+        meta: {name: '功能模块管理'},
+        component: RightFunction
+    },
+    {
+        name: 'functionAddSub',
+        path: 'function/add/:id',
+        meta: {name: '添加子菜单'},
+        component: RightFunctionAdd
+    },
+    {
+        name: 'functionAdd',
+        path: 'function/add',
+        meta: {name: '添加功能模块'},
+        component: RightFunctionAdd
+    },
+    {
+        name: 'functionEdit',
+        path: 'function/edit',
+        meta: {name: '更新功能模块'},
+        component: RightFunctionAdd
+    },
+    {
+        path: 'student',
+        component: Student
+    }
+]

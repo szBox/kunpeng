@@ -1,0 +1,55 @@
+<template>
+  <div class="add-edit-form-box">
+    <el-form>
+      <el-form-item>
+        <template>权限模板名称：<span>{{role.name}}</span></template>
+      </el-form-item>
+      <el-form-item>
+        <template>权限模板类型：<span v-if="role.type==1">教师</span><span v-else>学生</span></template>
+      </el-form-item>
+      <el-form-item>
+        <template>描述：<span>{{role.remark}}</span></template>
+      </el-form-item>
+      <el-form-item>
+        <template>新增时间：<span>{{role.insertTime | formatDate }}</span></template>
+      </el-form-item>
+      <el-form-item>
+        <el-button type="primary" @click="$routerGo(-1)">返回</el-button>
+      </el-form-item>
+    </el-form>
+  </div>
+</template>
+<script>
+  import * as role from '@/API/settings/right/role.js';
+  import {formatDate} from '@/assets/js/filters';
+  export default {
+    data() {
+      return {
+        role: {}
+      };
+    },
+    created(){
+      let vm = this, id = this.$route.params.id;
+      this.initRole(id);
+    },
+    methods: {
+      initRole(id){
+        let vm = this;
+        role.detail.r(id).then(function(res){
+          if(res.data.code == 0){
+            vm.role = res.data.data;
+          }
+        })
+      }
+    },
+    filters:{
+      formatDate: function(time){
+        let date = new Date(time);
+        return formatDate(date,'yyyy-MM-dd hh:mm:ss');
+      }
+    }
+  }
+</script>
+<style>
+
+</style>

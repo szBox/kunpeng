@@ -1,0 +1,8 @@
+
+const RightFunction = () => import(/* webpackChunkName: "setting" */ '@src/general/app/setting/right/function.vue');
+export default [
+    {
+        path: 'function',
+        component: RightFunction
+    }
+]

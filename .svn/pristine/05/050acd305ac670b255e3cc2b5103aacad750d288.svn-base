@@ -1,0 +1,169 @@
+<template>
+	<div class="home">
+		<!--<my-header></my-header>-->
+		<div class="gradSlect">
+			<el-select v-model="gid" placeholder="请选择" @change='select()'>
+			    <el-option
+			      v-for="item in gradeDate"
+			      :key="item.id"
+			      :label="item.name"
+			      :value="item.id">
+			    </el-option>
+			  </el-select>
+		</div>
+		<div class="echartBox">
+			<div class="echart1" style="width: 750px;">
+				<div id="map1" style="width: 100%;height:600px;">
+
+				</div>
+			</div>
+			<div class="echart2" style="width: 600px;">
+				<div id="map2" style="width: 100%;height:600px;">
+
+				</div>
+			</div>
+		</div>
+
+	</div>
+
+</template>
+
+<script>
+	import eChart from '@src/lib/myCharts.js' 
+	import home from '@src/network/home/home.js'
+	
+	export default {
+		data() {
+			return {
+				Xtype:[], //X 坐标的name
+				Xtype2:[0],
+				zhudata1:[], //柱状图   必读完成率 
+				zhudata2:[], //柱状图   选读完成率
+				 //年级列表,
+					gradeDate: [
+						{
+							id:'',
+							name:'全校数据统计'
+						}
+					],
+			        gid: '',
+				zhexian1:[''],
+				zhexian2:['']
+			}
+		},
+		components: {
+			//			myHeader
+		},
+		mounted() {
+			this.gradeList();
+			this.select();
+		},
+		methods:{
+			gradeList(){
+				home.gradeList().then(res => {
+                    console.log('grade',res)  //接受到的参数
+					if(res.data.code === 0) {
+						for(var i=0; i<res.data.data.length; i++){
+                        	this.gradeDate.push(res.data.data[i]);
+                        	this.global.session.set('gradeList', res.data.data);
+                        }
+                    }
+                    
+                })
+			},
+			select(){
+				this.Xtype=[];this.Xtype2=[''];
+				this.zhudata1=[];this.zhudata2=[];this.zhexian1=[0];this.zhexian2=[0];
+				var myChart1 = echarts.init(document.getElementById('map1'));
+				var myChart2 = echarts.init(document.getElementById('map2'));
+				console.log(this.gid)
+				let params = {
+					gradeId:this.gid
+				}
+				if(this.gid==''){
+					home.echartData(params).then(res => {
+	                    console.log('echart 全部数据',res)  //接受到的参数
+						if(res.data.code === 0) {
+							for(var i=0; i<res.data.data.length; i++){
+								var mode=res.data.data[i];
+	                        	this.Xtype.push(res.data.data[i].gradeName);
+	                        	this.Xtype2.push(res.data.data[i].gradeName);
+	                        	
+									this.zhudata1.push(mode.bookTypeRates[0].rate);
+		                        	this.zhudata2.push(mode.bookTypeRates[1].rate);
+		                        	this.zhexian1.push(mode.bookTypeRates[0].passCount);
+		                        	this.zhexian2.push(mode.bookTypeRates[1].passCount);
+	                        	
+							};
+						myChart1.setOption(eChart.zhu(this.Xtype,this.zhudata1,this.zhudata2))
+						myChart2.setOption(eChart.zhexian(this.Xtype2,this.zhexian1,this.zhexian2))
+	                    }
+	                    
+	                })
+				}
+				else{
+					home.echartData(params).then(res => {
+	                    console.log('echart 班级数据',res)  //接受到的参数
+						if(res.data.code === 0) {
+							for(var i=0; i<res.data.data.length; i++){
+								var mode=res.data.data[i];
+	                        	this.Xtype.push(res.data.data[i].classname);
+	                        	this.Xtype2.push(res.data.data[i].classname);
+									this.zhudata1.push(mode.bookTypeRates[0].rate);
+		                        	this.zhudata2.push(mode.bookTypeRates[1].rate);
+		                        	this.zhexian1.push(mode.bookTypeRates[0].passCount);
+		                        	this.zhexian2.push(mode.bookTypeRates[1].passCount);
+							};
+						myChart1.setOption(eChart.zhu(this.Xtype,this.zhudata1,this.zhudata2))
+						myChart2.setOption(eChart.zhexian(this.Xtype2,this.zhexian1,this.zhexian2))
+	                    }
+	                    
+	                })
+				}
+				
+			}
+		}
+	}
+</script>
+
+<style lang="less" scoped>
+	.home {
+		
+	}
+	.el-input__inner{
+		border-radius: 20px !important;
+	}
+	.gradSlect{
+		position: fixed;
+		top: 70px;
+		right: 0;
+	
+		height: 30px;
+		width: 200px;
+		z-index: 100;
+		/*margin-top: -40px;*/
+		float: right;
+		background: #f2f2f2;
+		margin-right: 300px;
+		
+		
+	}
+	.echartBox {
+		clear: both;
+		margin-top: 15px;
+		overflow: hidden;
+		/*background: #EEF3F9;*/
+		height: 100%;
+		.echart1 {
+			float: left;
+			
+			/*padding-top: 100px;*/
+			background: #fff;
+		}
+		.echart2 {
+			float: left;
+			margin-left: 20px;
+			background: #fff;
+		}
+	}
+</style>

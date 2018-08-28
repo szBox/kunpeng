@@ -1,0 +1,38 @@
+
+const Outer = { template: '<router-view></router-view>' };
+const Info = () => import(/* webpackChunkName: "info" */ '../general/info/index');
+const Test = () => import(/* webpackChunkName: "test" */ '../general/test/index');
+const App = () => import(/* webpackChunkName: "main" */ '../general/app/index');
+const Login = () => import(/* webpackChunkName: "login" */ '../general/login');
+const Forget = () => import(/* webpackChunkName: "login" */ '../general/forget');
+const QuestentType = () => import(/* webpackChunkName: "login" */ '../general/app/questBank/questType');
+const Home = () => import(/* webpackChunkName: "login" */ '../general/app/home/index');
+const routes = [
+    {
+        path: '/',
+        redirect:'/login',
+    },
+    {
+        path: '/home',
+        component: App,
+        children: [
+            { path: '', component: Home },
+            { path: 'info', component: Info },
+            { path: 'test', component: Test }
+        ]
+    },
+    {
+        path: '/login',
+        component: Login
+    },
+    {
+        path: '/forget',
+        component: Forget
+    },
+    {
+        path: '/questType',
+        component: QuestentType
+    }
+]
+
+export default routes;

@@ -1,0 +1,65 @@
+<template>
+  <div class="add-edit-form-box">
+    <el-form :model="paramForm" :rules="rules" ref="paramForm" label-width="100px" class="demo-ruleForm">
+      <el-form-item label-width="120px" label="学生身份名称" prop="name">
+        <el-input v-model="paramForm.name"></el-input>
+      </el-form-item>
+      <el-form-item label-width="120px" label="描述" prop="remark">
+        <el-input v-model="paramForm.remark"></el-input>
+      </el-form-item>
+      <el-form-item>
+        <el-button v-has="10010501" type="primary" @click="submitForm('paramForm')">提交</el-button>
+        <el-button type="primary" @click="$routerGo(-1)">返回</el-button>
+      </el-form-item>
+    </el-form>
+  </div>
+</template>
+<script>
+  import * as identity from '@/API/settings/right/identity.js';
+  export default {
+    data() {
+      return {
+        paramForm: {
+          name: '',
+          remark: ''
+        },
+        rules: {
+          name: [
+            { required: true, message: '请输入学生身份名称', trigger: 'blur' },
+            { min: 1, max: 40, message: '长度在 1 到 40 个字符', trigger: 'blur' }
+          ],
+          remark: [
+            { max: 100, message: '描述不超过100个字符', trigger: 'blur' }
+          ]
+        }
+      };
+    },
+    created(){
+    },
+    methods: {
+      submitForm(formName) {
+        let vm = this, pa = vm.paramForm, bl = false;
+        this.$refs[formName].validate((valid) => {
+          bl = valid;
+        });
+        if(!bl){
+          return false;
+        }
+        let param = {
+          "name": pa.name,
+          "type": 2,
+          "remark": pa.remark
+        };
+        identity.add.r(param).then(function(res){
+          if(res.data.code == 0){
+            vm.$message('新增成功');
+            vm.$routerGo(-1);
+          }
+        })
+      }
+    }
+  }
+</script>
+<style>
+
+</style>

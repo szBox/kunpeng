@@ -1,0 +1,21 @@
+<template>
+    <div class="questType">
+    </div>
+</template>
+<script>
+
+
+export default {
+    name: 'questType',
+    data: function () {
+        return {
+        }
+    },
+    components: {
+    }
+}
+</script>
+<style lang="less">
+
+</style>
+

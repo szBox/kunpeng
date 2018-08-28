@@ -1,0 +1,126 @@
+<template>
+    <div class="questType">
+            <SearchForm :items="items" :showMessage="true" :inline="true" :model="search" ref="onSubmit"></SearchForm>
+            <DataTable :loading="loading" :columns="columns" :data="data" :total="total" :page-size="search.size" @page-change="pageChange" @selection-change="selectionChange"></DataTable>
+    </div>
+</template>
+<script>
+
+    // 模块的引用
+    import SearchForm from '@components/search-form/index';
+    import DataTable from '@components/data-table/index'
+
+    //  接口
+    import answerApi from '@src/network/subject/quest-setting/answer';
+
+    export default {
+        name: 'questType',
+        data: function () {
+            return {
+                search: {
+                    current: 1,
+                    size: 10,
+                    name: '',
+                    value: ''
+                },
+                items: [
+                    {
+                        prop: 'name',
+                        type: 'input',
+                        label: '答题设置名称',
+                    },
+                    {
+                        type: 'action',
+                        actionList: [
+                            {
+                                text: '查询',
+                                btnType: 'warning',
+                                handleClick: (row) => {
+                                    this.answerList();
+                                }
+                            }
+                        ]
+                    }
+                ],
+                // table的属性设置
+                columns: [
+                    {
+                        label: '题目类型ID',
+                        prop: 'id'
+                    },
+                    {
+                        label: '答题设置名称',
+                        prop: 'name'
+                    },
+                    {
+                       label: '答题设置值',
+                        prop: 'value'
+                    },
+                    {
+                        label: '备注说明',
+                        prop: 'remark',
+                        type: ''
+                    },
+                    {
+                        type: 'action',
+                        width: '250',
+                        label: '操作',
+                        renderContent: (h, { row }) => {
+                            return [
+                                <el-button type='primary' size='mini' on-click={() => this.$router.push(`answerSet/view/${row.id}`)}>查看</el-button>,
+                                <el-button type='' style='border:1px solid #409EFF; color:#409EFF' size='mini' on-click={() => this.$router.push(`answerSet/edit/${row.id}`)}>更新</el-button>
+                            ];
+                        }
+                    }
+                ],
+                data: [],
+                loading: true, //  加载缓冲
+                total: 0,  // 总页数,
+                selection: []
+
+
+            }
+        },
+        components: {
+            SearchForm,
+            DataTable
+        },
+        methods: {
+            pageChange(index) {
+                this.search.current = index;
+                this.answerList();
+            },
+            answerList() {
+                let params = {
+                    ...this.search
+                };
+                this.loading = true;
+                answerApi.list(params).then(res => {
+                    if(res.data.code === 0) {
+                        this.loading = false;
+                        this.data = res.data.data.records;
+                        this.total = this.data.length;
+                    }
+                })
+            }
+        },
+        mounted() {
+            this.answerList();
+        },
+    }
+</script>
+<style lang="less">
+    .questType{
+    .bread-title{
+        padding: 10px 0 10px 20px;
+    .last >span{color: #474e5d;}
+    }
+    .content{
+        background-color: #ffffff;padding: 20px 18px;
+    .button-box{
+    .delectBatch{float: right}
+    }
+    }
+    }
+</style>
+

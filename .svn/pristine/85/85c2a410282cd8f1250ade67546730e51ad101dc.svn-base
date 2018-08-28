@@ -1,0 +1,21 @@
+const QueatSetting = () => import(/* webpackChunkName: "setting" */ '@src/general/app/subject/quest-setting');
+const ProblemSet = () => import(/* webpackChunkName: "setting" */ '@src/general/app/subject/problemSet');
+import questAll from './queat-setting';
+import problemAll from './problemSet';
+export default [
+    {
+        path: 'queat-setting',
+        name: '组题管理',
+        component: QueatSetting,
+        children: questAll
+    },
+    {
+        path: 'problemSet',
+        name: '组题系统',
+        component: ProblemSet,
+        children: problemAll
+    }
+]
+/**
+ * Created by Administrator on 2018/7/4.
+ */

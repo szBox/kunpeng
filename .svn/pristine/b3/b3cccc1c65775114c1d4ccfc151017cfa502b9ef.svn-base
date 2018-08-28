@@ -1,0 +1,224 @@
+<template>
+    <div class="questType">
+            <SearchForm :items="items" :showMessage="true" :inline="true" :model="search" ref="onSubmit"></SearchForm>
+           	<div class="button-box">
+              <el-button  class="btn-delete" type="danger" plain icon="el-icon-close" @click="delectAll(id)">批量删除</el-button>
+          </div>
+           <DataTable :loading="loading" :columns="columns" :data="data" :total="total" :page-size="search.size" @page-change="pageChange" @selection-change="selectionChange"></DataTable>
+    </div>
+</template>
+<script>
+
+    // 模块的引用
+    import SearchForm from '@components/search-form/index';
+    import DataTable from '@components/data-table/index'
+
+    //  接口
+    import reading from '@src/network/subject/quest-setting/reading.js';
+
+    export default {
+        name: 'questType',
+        data: function () {
+            return {
+                search: {
+                    current: 1,
+                    gradeId: '',
+                    size: 10,
+                    stuName: '',
+                    verifyType: 2,
+                    insertTime: ''
+                },
+                items: [
+                    {
+                        prop: 'stuName',
+                        type: 'input',
+                        placeholder: '请输入学生姓名',
+                        label: '学生姓名'
+                    },
+                    {
+                        prop: 'gradeId',
+                        type: 'select',
+                        label: '年级',
+                        options: [
+                        ],
+                        hasAll:true,
+                        defaultProps: {
+                            id: 'id',
+                            label: 'name'
+                        }
+                    },
+                    {
+                        type: 'action',
+                        actionList: [
+                            {
+                                text: '查询',
+                                btnType: 'warning',
+                                handleClick: (row) => {
+                                    this.answerWay();
+                                }
+                            }
+                        ]
+                    }
+                ],
+                // table的属性设置
+                columns: [
+                    {
+                        label: '学生姓名',
+                        prop: 'stuName'
+                    },
+                    {
+                        label: '所在班级',
+                        prop: 'className'
+                    },
+                    {
+                        label: '负责教师',
+                        prop: 'teaName'
+                    },
+                    {
+                        label: '申请重复答题书籍名称',
+                        prop: 'bookName',
+                    },
+                    {
+                        label: '申请原因',
+                        prop: 'remark',
+                    },
+                    {
+                        label: '申请时间',
+                        prop: 'insertTime',
+                        width:'150',
+                        renderContent: (h, { row }) => {
+                            return this.global.dateFilter.ymdHm(row.insertTime)
+                        }
+                    },
+                    {
+                        label: '审批状态',
+                        prop: 'verifyStatus',
+                        renderContent: (h, { row }) => {
+                            if(row.verifyStatus==0){
+                            	return '未处理'
+                            }
+                            if(row.verifyStatus==1){
+                            	return '通过'
+                            }
+                            if(row.verifyStatus==2){
+                            	return '驳回'
+                            }
+                        }
+                    },
+                    {
+                        label: '审批原因',
+                        prop: 'verifyRemark',
+                    },
+                    {
+                        label: '审批人',
+                        prop: 'verifyName',
+                    },
+                    {
+                        label: '审批时间',
+                         width:'150',
+                        prop: 'verifyTime',
+                        renderContent: (h, { row }) => {
+                            return this.global.dateFilter.ymdHm(row.verifyTime)
+                        }
+                    },
+                    {
+                        label: '新增答题机会',
+                        prop: 'answerNum',
+                    },
+                    {
+                        type: 'action',
+                        width: '250',
+                        label: '操作',
+                        renderContent: (h, { row }) => {
+                            return [
+                               <el-button type='primary' size='mini' on-click={() => this.$router.push(`time/edit/${row.id}`)}>处理</el-button>,
+                            <el-button type='danger' size='mini' on-click={() => this.global.deleteConfirm.call(this, this.delect, row.id)}>删除</el-button>
+                            ]
+                        }
+                    }
+                ],
+                data: [],
+                loading: true, //  加载缓冲
+                total: 0,  // 总页数,
+                deleteArr: []
+
+
+            }
+        },
+        components: {
+            SearchForm,
+            DataTable
+        },
+        methods: {
+            pageChange(index) {
+                this.search.current = index;
+                this.answerWay();
+            },
+            answerWay() {
+                let params = {
+                    ...this.search
+                };
+                this.loading = true;
+                reading.list(params).then(res => {
+                    if(res.data.code === 0) {
+                        this.loading = false;
+                        this.data = res.data.data.records;
+                        this.total = this.data.length;
+                    }
+                })
+            },
+            
+             selectionChange(data) {
+				this.deleteArr=[];
+				for (let item of data){
+					this.deleteArr.push(
+						item.id
+					)
+				}
+			},
+			 delect(id){
+            	if(this.data.length === 1 && this.search.current > 1) {
+           				this.search.current--;
+           		}
+                reading.del(id).then(res => {
+                    if(res.data.code === 0) {
+                        this.$message.success('删除成功');
+                        this.answerWay();
+                    }
+                })
+            },
+            delectAll() {
+				let self=this;
+		        if(this.deleteArr.length === 0) {
+		          this.$message.error('请至少选择一项');
+		          
+		          return;
+		        }else{
+//		        	console.log(this.deleteArr)
+		        	if(this.data.length === 1 && this.search.current > 1) {
+           				this.search.current--;
+           			}
+		        	let ids=this.deleteArr
+		        	console.log('ids,',ids)
+		        	this.global.deleteConfirm.call(this,function(){
+		        		reading.dels(ids).then(res => {
+					          if(res.data.code === 0) {
+					            self.$message.success('删除成功');
+					            self.answerWay();
+					          }
+					     })
+		        	})	
+		        	
+		        }
+		        
+		   },
+        },
+        mounted() {
+            this.answerWay();
+            this.items[1].options = this.global.session.get('gradeList')
+        }
+    }
+</script>
+<style lang="less">
+</style>
+

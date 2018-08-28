@@ -1,0 +1,280 @@
+<template>
+    <div id="app" class="app">
+        <el-container class="container">
+            <el-header class="header">
+                <div class="logo">
+                	<img src="../../assets/drawable-xxhdpi/home_icon_logo.png" alt="" />
+                	<span>鲲鹏读写平台</span>
+                </div>
+                <el-menu
+                    :default-active="active"
+                    class="el-menu"
+                    mode="horizontal"
+                    @select="menuSelect"
+                    background-color="#2C8CF0"
+                    text-color="#fff"
+                    active-text-color="#fff">
+                    <el-menu-item :index="index" v-for="(item, index) in menu" :key="index">{{item.name}}</el-menu-item>
+                </el-menu>
+                <div class="user">
+                	<ul>
+                		<li @click="goNum1" v-if='num1!=null && num1!="" && num1!="0"' class="li-relative">
+                			<span>答题次数申请</span>
+                			<i>{{num1 | numFilters}}</i>
+                		</li>
+                		<li @click="goNum2" v-if='num2!=null && num2!="" && num2!="0"'i class="li-relative">
+                			<span>阅读挑战申请</span>
+                			<i>{{num2 | numFilters}}</i>	
+                		</li>
+                		<li class="li-user">
+                			<img src="../../assets/drawable-xxhdpi/home_icon_Head.png" alt="" />
+                			<span>{{user.loginName}}</span>
+                		</li>
+                		<li class="li-icon">
+                			<img src="../../assets/drawable-xxhdpi/home_icon_Password.png" alt="" />
+                			<img src="../../assets/drawable-xxhdpi/home_icon_Signout.png" alt="" />
+                		</li>
+                	</ul>
+                	
+                	
+                	
+                	
+                </div> 
+            </el-header>
+            <el-container class="content">
+                <el-aside width="300px">
+                    <el-menu
+                    	ref="asideMenu"
+                        :router="true"
+                        :unique-opened="true"
+                        :default-active="subActive"
+                        @open="open"
+                        class="el-menu-vertical">
+                        <el-submenu :index="index" v-for="(item, index) in subMenu" :key="index">
+                            <template slot="title">
+                                <i class="el-icon-menu"></i>
+                                <span>{{item.name}}</span>
+                            </template>
+                            <el-menu-item-group v-if="item.trees">
+                                <el-menu-item :index="subItem.id" @click.native="toPath(item, subItem)" v-for="(subItem, subIndex) in item.trees" :key="subIndex">{{subItem.name}}</el-menu-item>
+                            </el-menu-item-group>
+                        </el-submenu>
+                    </el-menu>
+                </el-aside>
+                <el-main>
+                    <el-breadcrumb separator="/" class="my-breadcrumb">
+                        <el-breadcrumb-item v-for="(item, index) in routeMatched" :key="index">{{item}}</el-breadcrumb-item>
+                    </el-breadcrumb>
+                    <keep-alive>
+                        <router-view></router-view>
+                    </keep-alive>
+                </el-main>
+            </el-container>
+        </el-container>
+    </div>
+</template>
+
+<script>
+    import './index.less';
+    import home from '@src/network/home/home.js';
+    export default{
+        data() {
+            return {
+                active: 0,
+                subActive: 0,
+                menu: this.global.menu.get(),
+                subMenu: [],
+                rootPath: '',
+                user:'',
+                num1:'',
+                num2:''
+            }
+        },
+        filters:{
+        	numFilters(val){
+        		if(val>99){
+        			return '99+'
+        		}else{
+        			return val
+        		}
+        	}
+        },
+        methods: {
+        	open(index,indexP) {
+        		
+            	console.log(indexP)
+        	},
+            menuSelect(index) {
+            	this.subActive = '';
+                this.active = index;
+                this.subMenu = this.menu[index].trees || [];
+                this.rootPath = this.menu[index].url;
+                this.$router.push(this.menu[index].url);
+            },
+            toPath(item, subItem) {
+                let lastPath = '';
+                lastPath = this.rootPath + item.url + subItem.url;
+                this.$router.push(lastPath);
+            },
+            getNum(){
+            	home.num().then(res => {
+                    console.log('次数',res)  //接受到的参数
+					if(res.data.code === 0) {
+						this.num1=res.data.data.answerCount;
+						this.num2=res.data.data.readCount;
+                    }
+                    
+                })
+            },
+            goNum1(){
+            	this.active = 1;
+            	this.subMenu = this.menu[this.active].trees || [];
+                this.rootPath = this.menu[this.active].url;
+                this.$router.push(this.menu[this.active].url+'/answer/time');
+            	this.$refs.asideMenu.open(0);
+//          	this.$router.push({
+//          		path:'subject/answer/time'
+//          	})
+            },
+            goNum2(){
+            	this.active = 1;
+            	this.subMenu = this.menu[this.active].trees || [];
+                this.rootPath = this.menu[this.active].url;
+                this.$router.push(this.menu[this.active].url+'/answer/reading');
+            	this.$refs.asideMenu.open(0);
+//          	this.$router.push({
+//          		path:'subject/answer/time'
+//          	})
+            },
+        },
+        computed:{
+            routeMatched(){
+                let arr = [];
+                for(var i in this.$route.matched){
+                    arr.push(this.$route.matched[i].meta.name);
+                }
+                arr.shift();
+                return arr;
+            }
+        },
+        mounted() {
+        	this.user=this.global.session.get('user');
+        	this.getNum();
+            this.subMenu = this.menu[this.active].trees || [];
+            this.rootPath = this.menu[this.active].url;
+        }
+    };
+</script>
+<style lang="less">
+    .app{
+        .container{
+            .content{
+                height: calc(100vh - 60px);
+                .el-menu{
+                    border: none;
+                }
+                .el-main{
+                    background-color: #eff3f9;
+                    padding-top: 50px;
+                    .my-breadcrumb{
+                        position: fixed;
+                        top: 60px;
+                        z-index: 100;
+                        background: #eff3f9;
+                        display: block;
+                        width: 100%;
+                        height: 50px;
+                        line-height: 50px;
+                    }
+                }
+            }
+            .header{
+                background: #2C8CF0;
+                display: flex;
+                padding: 0;
+                >div{
+                    height: 100%;
+                    line-height: 60px;
+                    width: 300px;
+                }
+                .el-menu{
+                    flex: 1;
+                }
+                .logo{
+                	img{
+                		float: left;
+                		height: 50px;
+
+                		margin: 5px 10px 0 25px;
+                	}
+                	span{
+                		float: left;
+                		line-height: 60px;
+                		color: #fff;
+                		font-size: 15px;
+                	}
+                	line-height: 60px;
+                    width: 300px;
+                }
+                .user{
+                	width:500px;
+                	padding-right: 30px;
+                	>ul{
+                		margin: 0;
+                		overflow: hidden;
+                		line-height: 0 ;
+                		
+                	}
+                	
+                	>ul li{
+                		list-style: none;
+                		float: left;
+                		line-height: 60px;
+                		font-size: 14px;
+                		color: #fff;
+                		>img,span,i{
+                			cursor: pointer;
+                		}
+                	}
+                	li.li-user{
+                		margin-left: 40px;
+                		margin-right: 20px;
+                		img{
+                			height: 30px;
+                			margin-right: 5px;
+                			vertical-align: middle;
+                		}
+                		span{
+                			
+                		}
+                	}
+                	li.li-icon{
+                		
+                		img{
+                			height: 24px;
+                			margin-left: 25px;
+                			vertical-align: middle;
+                		}
+                	}
+                	li.li-relative{
+                		position: relative;
+                		margin-right: 40px;
+                		i{
+                			font-style: normal;
+                			position: absolute;
+                			top: 10px;
+                			right: -15px;
+                			background: #F43A3B;
+                			border-radius: 50%;
+                			width: 20px;
+                			height: 20px;
+                			line-height: 20px;
+                			text-align: center;
+                		}
+                	}
+                }
+            }
+        }
+    }
+</style>
+

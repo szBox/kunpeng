@@ -1,0 +1,340 @@
+<template>
+	<div class="paperSee">
+		<h4>更新试卷</h4>
+		<ul class="ul-head">
+			<li>
+				<div>阅读类型 : <span>{{paperTitle.readTypeName}} </span></div>
+				<div><span>总题目数 : </span>{{paperTitle.amount}}道</div>
+			</li>
+			<li>
+				<div>阅读年级 : <span>{{paperTitle.gradeName}}</span></div>
+				<div>答题时间 : <span>{{paperTitle.answerTime}}分钟</span></div>
+			</li>
+			<li>
+				<div>阅读书籍名称 : <span>{{paperTitle.readBookName}}</span></div>
+				<div>总分数 : <span>{{paperTitle.score}}分</span></div>
+			</li>
+			<li>
+				<div>组题方式 : <span>{{paperTitle.gqTypeName}}</span></div>
+			</li>
+			
+		</ul>
+			<ul v-loading="loading" class="paper-box">
+				<li v-for="(item,index) in data">
+					<h5 class="paper-title">{{index+1}}、 {{item.name}} 
+						<span class="edit-tips" @click="open(item.id)">修改题目信息</span>
+					</h5>
+					<div class="paper-cover" v-if="item.imageUrl">
+						<img :src="item.imageUrl" alt="" />
+					</div>
+					<ul class="ul-abcd">
+						<li v-for='(option,index) in item.qclist'>
+							<span class='option-A'  :class="{
+								'optionActive': item.correct.indexOf(option.id) != -1}">
+								{{index+1 | optionFilter}} :
+							</span>
+							{{option.value}} -- {{option.id}}
+						</li>
+					</ul>
+					
+					<p class="answer-hh">
+						正确答案 : 
+						<p>correct:  {{item.correct}}</p>
+						<span style="color: red;">{{item.correct | answerFn(item.qclist)}}</span>
+					</p>
+				</li>
+			</ul>
+			<el-dialog title='修改题目信息' :visible.sync="dialogFormVisible" style='overflow: hidden'>
+				<AnswerOptions :correct="correct" :qclist='qclist' :options='titleInfo' @EmitAnswer='editInit'></AnswerOptions>
+  				<div class="btn-dialog" style="float: right;">
+  					<el-button  @click='getEdit()'  type='primary' >提交</el-button>
+  					<el-button @click='close()' type='danger' >返回</el-button>
+  				</div>
+  					
+			</el-dialog>
+			
+			<el-button @click='goBack()' type='danger' >返回</el-button>
+		
+	</div>
+
+</template>
+
+<script>
+	import DataTable from '@components/data-table/index';
+	import SearchForm from '@components/search-form/index';
+	import home from '@src/network/home/home.js';
+	import paper from '@src/network/subject/quest-setting/paper.js';
+	import AnswerOptions from '@components/answer-options/index';
+	export default {
+		data() {
+			return {
+				titleInfo:{
+					name:'',
+					qclist:'',
+					correct:'',
+				},
+				correct:[],
+				qclist:[],
+				titleName:'',
+				titleNameData:'',
+				qclistData:[],
+				correctData:[],
+				items: [
+                    {
+                        prop: 'name',
+                        type: 'input',
+                        label: '题目',
+                        width: '500',
+                        value:'',
+                        rules: [
+                            {required: true, message: '题目不能为空'}
+                        ],
+                        hasAll: true,
+                    },
+                    {
+                    	prop: 'qclist',
+                        type: 'custom',
+                        label: '答案选项',
+                        options: [
+                        	{id: 1, value: 'A'},
+                        	{id: 2, value: 'B'},
+                        	{id: 3, value: 'C'},
+                        	{id: 4, value: 'D'}
+                        ]
+//						options:this.titleInfo.qclist
+                    },
+                    {
+                    	prop: 'title',
+                        label: '正确答案',
+                        value:'',
+                        rules: [
+                            {required: true, message: '正确答案不能为空'}
+                        ],
+                        hasAll: true,
+                    }
+ 
+                ],
+               
+                dialogFormVisible: false,
+                paperTitle:[],
+				data: [],
+				total: 0,
+				loading: true
+			}
+		},
+//		props:['correct'],
+		filters:{
+			optionFilter(val){
+				if(val==1){
+					return 'A'
+				}
+				if(val==2){
+					return 'B'
+				}
+				if(val==3){
+					return 'C'
+				}
+				if(val==4){
+					return 'D'
+				}
+				if(val==5){
+					return 'E'
+				}
+			},
+			answerFn(val,ids){
+				var abcd=''
+				var abcdArr =['A','B','C','D','E'];
+				var answerData = val.split(',');
+				for(var i=0; i<ids.length; i++){
+					for(var j=0; j<answerData.length; j++){
+						if(ids[i].id==answerData[j]){
+							abcd += abcdArr[ids.indexOf(ids[i])]
+						}
+					}
+				}
+				return abcd
+
+			}	
+
+			
+		},
+		methods: {
+			getPaper (){
+				let id=this.$route.params.id
+				paper.paper(id).then(res => {
+                    console.log('试卷详情',res)  //接受到的参数
+					if(res.data.code === 0) {
+						this.loading=false;
+						this.paperTitle = res.data.data;
+						this.data=res.data.data.questionsList;
+						
+                    }
+                    
+                })
+			},
+			open (tid){
+				this.dialogFormVisible=true;
+				paper.getTitle(tid).then(res => {
+                    console.log('题目  详情ss',res)  //接受到的参数
+					if(res.data.code === 0) {
+						let correctInit ='';
+						this.qclist=[];
+						this.correct=[];
+						this.titleInfo=res.data.data;
+						for(var i=0; i<res.data.data.qclist.length; i++){
+							this.qclist.push(res.data.data.qclist[i].id)
+						}
+						correctInit=res.data.data.correct.split(',')
+						for(var j=0; j<correctInit.length; j++){
+							this.correct.push(Number(correctInit[j]))
+						}
+						console.log(this.qclist)
+						console.log(this.correct)
+                    }
+                    
+                })
+			},
+			editInit (name,option,answer){
+				this.titleNameData=name;
+				this.qclistData =option;
+				this.correctData=answer
+			},
+			getEdit (){
+				// 获取组件传过来的 答案的值      this.editInit()
+				let optionErr=true
+				console.log('返回的11',this.titleNameData,this.qclistData,this.correctData);
+				for(var i=0; i<this.qclistData.length; i++){
+					if(this.qclistData[i].value==''){
+						optionErr=false;
+					}
+				}
+				if(this.titleNameData==''){
+					this.$message.error('题目名称不能为空');
+				}
+				else if(optionErr==false){
+					this.$message.error('选项内容不能为空');
+				}
+				else if(this.correctData==''){
+					this.$message.error('请至少选择一个正确答案');
+				}else{
+					//请求ajax
+					console.log('11111');
+					let params ={
+//						answerTypeId: 0,
+						correctChoiceIds:this.correctData,
+						id: this.titleInfo.id,
+						imageUrl: this.titleInfo.imageUrl,
+						name: this.titleNameData,
+						questionChoices:this.qclistData, 
+//						questionsRankId: this.titleInfo.rank,
+						questionsTypeId: this.titleInfo.qyid,
+					}
+					paper.EditTitle(params).then(res => {
+	                    console.log('更新题目',res)  //接受到的参数
+						if(res.data.code === 0) {
+							this.$message.success('修改成功');
+							this.dialogFormVisible=false;
+							this.getPaper();
+	                    }
+                    
+               		})
+				}
+			},
+			close (){
+				this.dialogFormVisible=false;
+			},
+			goBack(){
+            	this.$router.go(-1);
+            },
+   
+		},
+		mounted() {
+			this.getPaper();
+		},
+		components: {
+			DataTable,
+			SearchForm,
+			AnswerOptions
+		}
+	}
+</script>
+
+
+<style lang="less" scoped>
+	
+	.paperSee{
+		background: #fff;
+		padding: 20px;
+	}
+	.paper-cover {
+		>img{
+			max-width: 400px;
+			max-height:200px;	
+		}
+	}
+	ul.ul-head{
+		padding-left: 0;
+		overflow: hidden;
+		li{
+			font-size: 14px;
+			float: left;
+			margin-right: 50px;
+			>div{
+				margin-bottom: 20px;
+				>span{
+					color: #666;
+				}
+			}
+		}
+	}
+	ul.paper-box{
+		padding-left: 0;
+		>li{
+			margin: 30px 0;
+		}
+		.paper-title{
+			margin: 5px 0;
+			}
+		ul.ul-abcd{
+			padding-left: 0;
+			margin-left: 22px;
+			overflow: hidden;
+			li{
+				/*float: left;*/
+				margin: 8px 0;
+				/*margin-right: 30px;*/
+			}
+			
+			/*li:nth-child(3n){
+				clear: left;
+			}*/
+		}
+		p.answer-hh{
+			margin-top: 10px;
+			margin-left: 24px;
+		}
+	}
+	.option-A{
+		display: inline-block;
+		width: 25px;
+		height: 25px;
+		line-height: 25px;
+		text-align: center;
+	}
+	.optionActive{
+		border: 1px solid red;
+		border-radius: 50%;
+	}
+	.edit-tips{
+		font-size: 14px;
+		font-style: normal;
+		cursor: pointer;
+		color: #fff;
+		margin-left: 20px;
+		padding: 4px 6px;
+		text-align: center;
+		background: #FE9900;
+		border-radius: 4px;
+	}
+</style>
+

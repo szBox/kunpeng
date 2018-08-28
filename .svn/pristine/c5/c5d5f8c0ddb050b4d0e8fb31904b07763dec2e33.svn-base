@@ -1,0 +1,76 @@
+<template>
+	<div class="home">
+		<!--<my-header></my-header>-->
+		<div class="echartBox">
+			<div class="echart1">
+				<div id="map1" style="width: 100%;height:500px;">
+
+				</div>
+			</div>
+			<div class="echart2">
+				<div id="map2" style="width: 100%;height:500px;">
+
+				</div>
+			</div>
+		</div>
+
+	</div>
+
+</template>
+
+<script>
+	//	import myHeader from './header'
+	//	import echarts from 'echarts';
+	import eChart from '@src/lib/myCharts.js' 
+	
+	export default {
+		data() {
+			return {
+				zhuArr1:[30, 50, 50, 60, 70, 80],
+				zhuArr2:[50, 70, 90, 40, 85, 95],
+				
+				zhexian1:[0],
+//				zhexian2:[0, 120, 132, 101, 134, 90, 230, 210],
+				zhexian2:[0]
+			}
+		},
+		components: {
+			//			myHeader
+		},
+		mounted() {
+			var myChart1 = echarts.init(document.getElementById('map1'));
+			var myChart2 = echarts.init(document.getElementById('map2'));
+			var xx1=[220, 182, 191, 234, 290, 330, 310];
+			var xx2=[120, 132, 101, 134, 90, 230, 210];
+			this.zhexian1=this.zhexian2.concat(xx1);
+			this.zhexian2=this.zhexian2.concat(xx2);
+			
+			myChart1.setOption(eChart.zhu(this.zhuArr1,this.zhuArr2))
+			myChart2.setOption(eChart.zhexian(this.zhexian1,this.zhexian2))
+		},
+	}
+</script>
+
+<style lang="less" scoped>
+	.home {
+		
+	}
+	
+	.echartBox {
+		overflow: hidden;
+		/*background: #EEF3F9;*/
+		height: 100%;
+		.echart1 {
+			float: left;
+			width: 750px;
+			padding-top: 100px;
+			background: #fff;
+		}
+		.echart2 {
+			float: right;
+			padding-top: 100px;
+			width: 700px;
+			background: #fff;
+		}
+	}
+</style>

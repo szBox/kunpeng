@@ -1,0 +1,178 @@
+<template>
+	<div>
+		<SearchForm :items="items" :showMessage="true" :inline="true" labelWidth="" :model="search" ref="locationAddForm"></SearchForm>
+		<DataTable :loading="loading" :columns="columns" :data="data" :total="total" :page-size="search.size" @page-change="pageChange"></DataTable>
+	</div>
+
+</template>
+
+<script>
+	import DataTable from '@components/data-table/index';
+	import SearchForm from '@components/search-form/index';
+
+	import home from '@src/network/home/home.js';
+	import statistics from '@src/network/statistics/statistics.js'
+	
+	export default {
+		data() {
+			return {
+				search: {
+					bookName: "",
+					classId: '',
+					gradeId: '',
+					stuName: "",
+					current: 1,
+					id:'',
+					size:6
+				},
+				items: [
+                    {
+                        prop: 'gradeId',
+                        type: 'select',
+                        label: '年级',
+                        value:'',
+//                      rules: [
+//                          {required: true, message: '位置不能为空'}
+//                      ],
+                        options: [
+                        ],
+                        defaultProps: {
+                        	id: 'id',
+                        	label: 'name'
+                        },
+                        hasAll: true,
+                        change: (val) => {
+                            this.classList(val);
+                        }
+                    },
+                    {
+                        prop: 'classId',
+                        type: 'select',
+                        label: '班级',
+                        options: [  
+                        ],
+                        defaultProps: {
+                        	id: 'id',
+                        	label: 'name'
+                        },
+                        hasAll: true
+                    },
+                    
+                    {
+                        prop: 'stuName',
+                        type: 'input',
+                        label: '学生姓名',
+                    },
+                    {
+                        prop: 'id',
+                        type: 'input',
+                        label: '学号',
+                    },
+                    {
+                        type: 'action',
+                        actionList: [
+                            {
+                                text: '查询',
+                                btnType: 'warning',
+                                handleClick: () => {
+									this.tableList()
+//                                  this.formValidate('locationAddForm', this.save);
+                                }
+                            },
+                            
+                        ]
+                    }
+                ],
+				columns: [{
+						label: '学生姓名',
+						prop: 'stuname'
+					},
+					{
+						label: '学号',
+						prop: 'id'
+					},
+					{
+						label: '所在班级',
+						prop: 'classname'
+					},
+					{
+						label: '负责教师',
+						prop: 'teaname'
+					},
+					{
+						label: '年级',
+						prop: 'gradename'
+					},
+					
+					{
+						label: '书籍完成数',
+						prop: 'countname'
+					},
+					
+					{
+						label: '操作',
+						type: 'action',
+						renderContent: (h, { row }) => {
+                            return [
+                            <el-button type='primary' size='mini' on-click={() => this.$router.push({ name: 'tongjiInfo', params: { sid: row.id }})}>查看详情</el-button>,
+                            ];
+                        }
+					},
+				],
+				data: [],
+				total: 0,
+				loading: true
+			}
+		},
+		methods: {
+			pageChange(index) {
+				this.search.current = index;
+				this.tableList();
+			},
+			
+			tableList() {
+				statistics.table2(this.search).then(res => {
+                    console.log('答题统计 表格',res)  //接受到的参数
+					if(res.data.code === 0) {
+						this.loading = false;
+						this.data = res.data.data.records;
+                        this.total =  res.data.data.total;
+                    }
+                    
+                })
+            },
+           
+			classList(){
+				let params = {
+					sid:this.global.session.get('user').sid,
+					gid:this.search.gradeId
+				};
+				home.classList(params).then(res => {
+                    console.log('班级下拉 列表',res)  //接受到的参数
+					if(res.data.code === 0) {
+						this.items[1].options = res.data.data;
+                    }
+                    
+                })
+			},
+		},
+		mounted() {
+			this.items[0].options=this.global.session.get('gradeList') 
+			this.tableList()
+			this.classList()
+		},
+		components: {
+			DataTable,
+			SearchForm
+		}
+	}
+</script>
+<style>
+	
+</style>
+
+<style lang="less" scoped>
+
+	
+</style>
+

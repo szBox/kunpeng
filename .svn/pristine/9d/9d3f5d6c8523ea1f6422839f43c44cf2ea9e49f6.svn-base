@@ -1,0 +1,35 @@
+const App = () => import(/* webpackChunkName: "main" */ '../general/app/index');
+const Login = () => import(/* webpackChunkName: "login" */ '../general/login');
+const Forget = () => import(/* webpackChunkName: "login" */ '../general/forget');
+const Home = () => import(/* webpackChunkName: "login" */ '../general/app/home/index');
+const Setting = () => import(/* webpackChunkName: "setting" */ '../general/app/setting/index');
+const Subject = () => import(/* webpackChunkName: "setting" */ '../general/app/subject/index');
+const Statistics = () => import(/* webpackChunkName: "statistics" */ '../general/app/statistics/index');
+
+import setting_children from './setting/index.js';
+import subject_children from './subject/index.js';
+import statistics_children from './statistics/index.js';
+
+const routes = [
+    {
+        path: '/',
+        component: App,
+        redirect: 'index',
+        children: [
+            { path: 'index', component: Home },
+            { path: 'setting', component: Setting, children: setting_children },
+            { path: 'subject', component: Subject, children: subject_children },
+            { path: 'statistics', component: Statistics, children: statistics_children }
+        ]
+    },
+    {
+        path: '/login',
+        component: Login
+    },
+    {
+        path: '/forget',
+        component: Forget
+    }
+]
+
+export default routes;

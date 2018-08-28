@@ -1,0 +1,176 @@
+
+const RightFunction = () => import(/* webpackChunkName: "setting" */ '@src/general/app/setting/right/function/index.vue');
+const RightFunctionAdd = () => import(/* webpackChunkName: "setting" */ '@src/general/app/setting/right/function/add.vue');
+
+/*身份管理*/
+const IdentityTeacher = () => import(/* webpackChunkName: "setting" */ '@src/general/app/setting/right/Identity/Teacher.vue');
+const IdentityStudent = () => import(/* webpackChunkName: "setting" */ '@src/general/app/setting/right/Identity/Student.vue');
+
+const IdentityTeacherSee = () => import(/* webpackChunkName: "setting" */ '@src/general/app/setting/right/Identity/T_See.vue');
+const IdentityTeacherAdd = () => import(/* webpackChunkName: "setting" */ '@src/general/app/setting/right/Identity/T_Add.vue');
+const IdentityTeacherEdit = () => import(/* webpackChunkName: "setting" */ '@src/general/app/setting/right/Identity/T_Edit.vue');
+
+const IdentityStudentSee = () => import(/* webpackChunkName: "setting" */ '@src/general/app/setting/right/Identity/S_See.vue');
+const IdentityStudentAdd = () => import(/* webpackChunkName: "setting" */ '@src/general/app/setting/right/Identity/S_Add.vue');
+const IdentityStudentEdit = () => import(/* webpackChunkName: "setting" */ '@src/general/app/setting/right/Identity/S_Edit.vue');
+
+
+/*权限管理*/
+const AuthorityTeacher = () => import(/* webpackChunkName: "setting" */ '@src/general/app/setting/right/Authority/Teacher.vue');
+const AuthorityStudent = () => import(/* webpackChunkName: "setting" */ '@src/general/app/setting/right/Authority/Student.vue');
+
+const AuthorityTeacherSee = () => import(/* webpackChunkName: "setting" */ '@src/general/app/setting/right/Authority/T_See.vue');
+const AuthorityTeacherAdd = () => import(/* webpackChunkName: "setting" */ '@src/general/app/setting/right/Authority/T_Add.vue');
+const AuthorityTeacherEdit = () => import(/* webpackChunkName: "setting" */ '@src/general/app/setting/right/Authority/T_Edit.vue');
+
+const AuthorityStudentSee = () => import(/* webpackChunkName: "setting" */ '@src/general/app/setting/right/Authority/S_See.vue');
+const AuthorityStudentAdd = () => import(/* webpackChunkName: "setting" */ '@src/general/app/setting/right/Authority/S_Add.vue');
+const AuthorityStudentEdit = () => import(/* webpackChunkName: "setting" */ '@src/general/app/setting/right/Authority/S_Edit.vue');
+
+export default [
+
+	//功能模块
+    {
+        path: 'function',
+        name: 'function',
+        meta: {name: '功能模块管理'},
+        component: RightFunction
+    },
+    {
+        name: 'functionAddSub',
+        path: 'function/add/:id',
+        meta: {name: '添加子菜单'},
+        component: RightFunctionAdd
+    },
+    {
+        name: 'functionAdd',
+        path: 'function/add',
+        meta: {name: '添加功能模块'},
+        component: RightFunctionAdd
+    },
+    {
+        name: 'functionEdit',
+        path: 'function/edit',
+        meta: {name: '更新功能模块'},
+        component: RightFunctionAdd
+    },
+    
+    /*****************身份管理*******************/
+    //老师身份管理
+    {
+        name: 'IdentityTeacher',
+        path: 'identity/teacher',
+        meta: {name: '教师身份管理'},
+        component: IdentityTeacher
+    },
+    //查看
+    {
+        name: 'IdentityTeacherSee',
+        path: 'identity/teacher/see/:id',
+        meta: {name: '教师身份详情'},
+        component: IdentityTeacherSee
+    },
+     //添加
+    {
+        name: 'IdentityTeacherAdd',
+        path: 'identity/teacher/add',
+        meta: {name: '教师身份新增'},
+        component: IdentityTeacherAdd
+    },
+     //编辑
+    {
+        name: 'IdentityTeacherEdit',
+        path: 'identity/teacher/edit/:id',
+        meta: {name: '教师身份编辑'},
+        component: IdentityTeacherEdit
+    },
+    
+    
+     //学生身份管理
+    {
+        name: 'IdentityStudent',
+        path: 'identity/student',
+        meta: {name: '学生身份管理'},
+        component: IdentityStudent
+    },
+    //查看
+    {
+        name: 'IdentityStudentSee',
+        path: 'identity/student/see/:id',
+        meta: {name: '学生身份详情'},
+        component: IdentityStudentSee
+    },
+     //添加
+    {
+        name: 'IdentityStudentAdd',
+        path: 'identity/student/add',
+        meta: {name: '学生身份新增'},
+        component: IdentityStudentAdd
+    },
+     //编辑
+    {
+        name: 'IdentityStudentEdit',
+        path: 'identity/student/edit/:id',
+        meta: {name: '学生身份编辑'},
+        component: IdentityStudentEdit
+    },
+    
+    /****************权限管理*******************/
+   //老师权限管理
+    {
+        name: 'AuthorityTeacher',
+        path: 'authority/teacher',
+        meta: {name: '教师权限管理'},
+        component: AuthorityTeacher
+    },
+    //查看
+    {
+        name: 'AuthorityTeacherSee',
+        path: 'authority/teacher/see/:id',
+        meta: {name: '教师权限详情'},
+        component: AuthorityTeacherSee
+    },
+    //添加
+    {
+        name: 'AuthorityTeacherAdd',
+        path: 'authority/teacher/add',
+        meta: {name: '教师权限新增'},
+        component: AuthorityTeacherAdd
+    },
+    //编辑
+    {
+        name: 'AuthorityTeacherEdit',
+        path: 'authority/teacher/edit/:id',
+        meta: {name: '教师权限编辑'},
+        component: AuthorityTeacherEdit
+    },
+    //学生权限管理
+    {
+        name: 'AuthorityStudent',
+        path: 'authority/student',
+        meta: {name: '学生权限管理'},
+        component: AuthorityStudent
+    },
+    //查看
+    {
+        name: 'AuthorityStudentSee',
+        path: 'authority/student/see/:id',
+        meta: {name: '学生权限详情'},
+        component: AuthorityStudentSee
+    },
+    //添加
+    {
+        name: 'AuthorityStudentAdd',
+        path: 'authority/student/add',
+        meta: {name: '学生权限新增'},
+        component: AuthorityStudentAdd
+    },
+    //编辑
+    {
+        name: 'AuthorityStudentEdit',
+        path: 'authority/student/edit/:id',
+        meta: {name: '学生权限编辑'},
+        component: AuthorityStudentEdit
+    },
+    
+]

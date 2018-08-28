@@ -1,0 +1,107 @@
+<template>
+	<div>
+		<h4>统计详情</h4>
+		<!--<SearchForm :items="items" :showMessage="true" :inline="true" labelWidth="" :model="search" ref="locationAddForm"></SearchForm>-->
+		<DataTable :loading="loading" :columns="columns" :data="data" :total="total" :page-size="search.size" @page-change="pageChange"></DataTable>
+		<el-button type='primary' @click='goback'>返回</el-button>
+	</div>
+
+</template>
+
+<script>
+	import DataTable from '@components/data-table/index';
+	import SearchForm from '@components/search-form/index';
+	import grade from '@src/network/home/gradeList.js'
+	import Class from '@src/network/home/classList.js'
+	import answerInfo from '@src/network/statistics/answer/answerInfo.js'
+	
+	export default {
+		data() {
+			return {
+				search: {
+					studentId: this.$route.params.sid,
+					current: 1,
+					size:6
+				},
+				columns: [{
+						label: '学生姓名',
+						prop: 'stuname'
+					},
+					{
+						label: '学号',
+						prop: 'stuid'
+					},
+					{
+						label: '所在班级',
+						prop: 'classname'
+					},
+					{
+						label: '年级',
+						prop: 'gradename'
+					},
+					{
+						label: '阅读书籍',
+						prop: 'bookName'
+					},
+					{
+						label: '阅读类型',
+						prop: 'rtypeName'
+					},
+					{
+						label: '当前书籍答题次数',
+						prop: 'answerCount'
+					},
+					{
+						label: '最高分值',
+						prop: 'maxScore'
+					},
+					{
+						label: '完成时间',
+						prop: 'insertTime'
+					},
+				],
+				data: [],
+				total: 0,
+				loading: true
+			}
+		},
+		methods: {
+			pageChange(index) {
+				this.search.current = index;
+				this.tableList();
+			},
+			
+			tableList() {
+				answerInfo.answerInfo(this.search).then(res => {
+                    console.log('个人详情',res)  //接受到的参数
+					if(res.data.code === 0) {
+						this.loading = false;
+						this.data = res.data.data.records;
+                        this.total =  res.data.data.total;
+                    }
+                    
+                })
+           },
+           goback(){
+           		 this.$router.go(-1);
+           }
+		},
+		mounted() {
+			this.tableList()
+
+		},
+		components: {
+			DataTable,
+			SearchForm
+		}
+	}
+</script>
+<style>
+	
+</style>
+
+<style lang="less" scoped>
+
+	
+</style>
+

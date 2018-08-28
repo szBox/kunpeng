@@ -1,0 +1,13 @@
+.my-el-table{
+    margin-bottom: 20px;
+}
+.my-el-pagination{
+    text-align: right;
+}
+.my-table .cell{
+    overflow: hidden;
+    text-overflow: ellipsis;
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 4;
+}
